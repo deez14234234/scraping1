@@ -1,0 +1,586 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Header Principal - Pantalla Completa -->
+<div class="dashboard-header full-width">
+    <h1>📊 Dashboard Principal</h1>
+    <p class="muted">Sistema de Monitoreo de Noticias y Redes Sociales</p>
+</div>
+
+{% if current_user and current_user.trial_expires %}
+<div class="trial-banner" style="background:#fffbeb;border:1px solid #f59e0b;padding:10px;border-radius:6px;margin-bottom:1rem;">
+    <strong>🎁 Trial Premium activo</strong> — Expira el: <em>{{ current_user.trial_expires }}</em>
+</div>
+{% endif %}
+
+<!-- Tarjetas de Métricas Principales - Expandidas -->
+<div class="metrics-grid full-width">
+    <!-- Total Noticias -->
+    <div class="metric-card metric-news">
+        <div class="metric-content">
+            <div class="metric-text">
+                <h3>TOTAL NOTICIAS</h3>
+                <div class="metric-value">{{ total_noticias }}</div>
+            </div>
+            <div class="metric-icon">📰</div>
+        </div>
+        <p class="metric-description">Noticias scrapeadas</p>
+    </div>
+
+    <!-- Posts Redes Sociales -->
+    <div class="metric-card metric-social">
+        <div class="metric-content">
+            <div class="metric-text">
+                <h3>REDES SOCIALES</h3>
+                <div class="metric-value">{{ total_social }}</div>
+            </div>
+            <div class="metric-icon">📱</div>
+        </div>
+        <p class="metric-description">Posts monitoreados</p>
+    </div>
+
+    <!-- Categorías Activas -->
+    <div class="metric-card metric-categories">
+        <div class="metric-content">
+            <div class="metric-text">
+                <h3>CATEGORÍAS</h3>
+                <div class="metric-value">{{ categorias|length }}</div>
+            </div>
+            <div class="metric-icon">🏷️</div>
+        </div>
+        <p class="metric-description">Categorías activas</p>
+    </div>
+
+    <!-- Fuentes Activas -->
+    <div class="metric-card metric-sources">
+        <div class="metric-content">
+            <div class="metric-text">
+                <h3>FUENTES</h3>
+                <div class="metric-value">{{ total_fuentes }}</div>
+            </div>
+            <div class="metric-icon">🌐</div>
+        </div>
+        <p class="metric-description">{{ fuentes_habilitadas }} habilitadas</p>
+    </div>
+</div>
+
+<!-- Acciones Rápidas - Pantalla Completa -->
+<div class="quick-actions full-width">
+    <h2>🚀 Acciones Rápidas</h2>
+    <div class="grid grid-4">
+        <!-- Ver Noticias -->
+        <div class="card action-card">
+            <div class="action-content">
+                <div class="action-icon">📰</div>
+                <h4>Ver Noticias</h4>
+                <p>Explora todas las noticias scrapeadas</p>
+                <a class="btn btn-primary action-btn" href="/web/news">Explorar</a>
+            </div>
+        </div>
+
+        <!-- Redes Sociales -->
+        <div class="card action-card">
+            <div class="action-content">
+                <div class="action-icon">📱</div>
+                <h4>Redes Sociales</h4>
+                <p>Posts de Twitter y Facebook</p>
+                <a class="btn btn-social action-btn" href="/api/social/dashboard">Ver Posts</a>
+            </div>
+        </div>
+
+        <!-- Gestionar Fuentes -->
+        <div class="card action-card">
+            <div class="action-content">
+                <div class="action-icon">⚙️</div>
+                <h4>Gestionar Fuentes</h4>
+                <p>Configurar scraping</p>
+                <a class="btn btn-sources action-btn" href="/web/sources">Configurar</a>
+            </div>
+        </div>
+
+        <!-- Métricas -->
+        <div class="card action-card">
+            <div class="action-content">
+                <div class="action-icon">📈</div>
+                <h4>Métricas</h4>
+                <p>Estadísticas del sistema</p>
+                <a class="btn btn-metrics action-btn" href="/web/metrics">Ver Stats</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if admin_recent_upgrades and admin_recent_upgrades|length > 0 %}
+<div class="section" style="margin-top:1.5rem;">
+    <h2>🟢 Suscripciones Premium Recientes</h2>
+    <table class="table" style="width:100%; margin-top:0.5rem;">
+        <thead>
+            <tr><th>Email</th><th>Inicio Trial / Expira</th><th>Registrado</th></tr>
+        </thead>
+        <tbody>
+            {% for u in admin_recent_upgrades %}
+            <tr>
+                <td>{{ u.email if u.email else (u.user_id if u.user_id else u.raw) }}</td>
+                <td>{{ u.plan_trial_expires if u.plan_trial_expires else '-' }}</td>
+                <td>{{ u.created_at if u.created_at else '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- Categorías Disponibles - Pantalla Completa -->
+<div class="categories-section full-width">
+    <div class="section-header">
+        <h2>🏷️ Categorías Disponibles</h2>
+        <span class="badge">{{ categorias|length }} categorías</span>
+    </div>
+
+    {% if categorias %}
+    <div class="grid grid-3">
+        {% for categoria in categorias %}
+        <div class="card category-card">
+            <div class="category-icon">
+                {% if categoria == "Deportes" %}⚽
+                {% elif categoria == "Política" %}🏛️
+                {% elif categoria == "Economía" %}💼
+                {% elif categoria == "Tecnología" %}💻
+                {% elif categoria == "Salud" %}🏥
+                {% elif categoria == "General" %}📰
+                {% else %}🏷️{% endif %}
+            </div>
+            <h4>{{ categoria }}</h4>
+            <a class="btn btn-secondary category-btn" 
+               href="/web/news?categoria={{ categoria }}">
+                Explorar Noticias
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No hay categorías registradas</h3>
+        <p>Las categorías se detectan automáticamente al hacer scraping</p>
+        <a class="btn btn-primary" href="/web/sources">
+            🚀 Ejecutar Scraping
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- API & Exportaciones - Pantalla Completa -->
+<div class="api-section full-width">
+    <h2>🔧 API & Exportaciones</h2>
+    <div class="grid grid-2">
+        <div class="card api-card">
+            <h4>📡 API Endpoints</h4>
+            <div class="api-links">
+                <a class="btn api-btn" href="/docs">
+                    <span>📖</span> Documentación API
+                </a>
+                <a class="btn api-btn" href="/api/health">
+                    <span>💚</span> Health Check
+                </a>
+                <a class="btn api-btn" href="/api/news">
+                    <span>📰</span> Noticias API
+                </a>
+                <a class="btn api-btn" href="/api/social/stats">
+                    <span>📊</span> Stats Redes Sociales
+                </a>
+            </div>
+        </div>
+
+        <div class="card api-card">
+            <h4>💾 Exportar Datos</h4>
+            <div class="api-links">
+                <a class="btn api-btn" href="/api/export/csv">
+                    <span>📄</span> Exportar CSV
+                </a>
+                <a class="btn api-btn" href="/api/export/json">
+                    <span>🔷</span> Exportar JSON
+                </a>
+                <a class="btn api-btn" href="/api/social/api/posts">
+                    <span>📱</span> Posts Redes Sociales
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer del Dashboard -->
+<div class="dashboard-footer full-width">
+    <p class="muted">
+        🚀 Sistema de Monitoreo de Noticias • 
+        <strong>{{ total_noticias }}</strong> noticias procesadas • 
+        Última actualización: <strong>{{ ultima_actualizacion }}</strong>
+    </p>
+</div>
+
+<style>
+/* ====== DASHBOARD PANTALLA COMPLETA ====== */
+.dashboard-header {
+    margin-bottom: 2rem;
+    width: 100%;
+}
+
+.dashboard-header h1 {
+    margin: 0 0 0.5rem 0;
+    color: #1a365d;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.dashboard-header .muted {
+    font-size: 1.1rem;
+    color: #4a5568;
+    margin: 0;
+}
+
+/* ====== MÉTRICAS EXPANDIDAS ====== */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    width: 100%;
+}
+
+.metric-card {
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.metric-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex: 1;
+}
+
+.metric-text {
+    flex: 1;
+}
+
+.metric-card h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    font-weight: 600;
+}
+
+.metric-value {
+    margin: 0.5rem 0 0 0;
+    font-size: 2.2rem;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.metric-description {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.metric-icon {
+    font-size: 2.5rem;
+    opacity: 0.9;
+}
+
+/* Colores de las métricas */
+.metric-news { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.metric-social { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.metric-categories { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.metric-sources { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+/* ====== ACCIONES RÁPIDAS ====== */
+.quick-actions {
+    margin-bottom: 2.5rem;
+    width: 100%;
+}
+
+.quick-actions h2 {
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+
+.action-card {
+    text-align: center;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.action-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.action-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.action-card h4 {
+    margin: 0.5rem 0;
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.action-card p {
+    color: #718096;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    flex: 1;
+}
+
+.action-btn {
+    width: 100%;
+    margin-top: auto;
+}
+
+/* Botones de acciones específicos */
+.btn-social { background: #ed64a6; color: white; }
+.btn-social:hover { background: #d53f8c; }
+
+.btn-sources { background: #48bb78; color: white; }
+.btn-sources:hover { background: #38a169; }
+
+.btn-metrics { background: #ecc94b; color: #744210; }
+.btn-metrics:hover { background: #d69e2e; }
+
+/* ====== CATEGORÍAS ====== */
+.categories-section {
+    margin-bottom: 2.5rem;
+    width: 100%;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+    color: #2d3748;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.category-card {
+    text-align: center;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.category-icon {
+    font-size: 2rem;
+    margin-bottom: 0.8rem;
+}
+
+.category-card h4 {
+    margin: 0.5rem 0;
+    color: #2d3748;
+}
+
+.category-btn {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+/* Estado vacío */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: #f7fafc;
+    border: 2px dashed #cbd5e0;
+    border-radius: 12px;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: #718096;
+    margin-bottom: 1.5rem;
+}
+
+/* ====== API SECTION ====== */
+.api-section {
+    background: #f7fafc;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    width: 100%;
+}
+
+.api-section h2 {
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.api-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.api-card h4 {
+    color: #2d3748;
+    margin-bottom: 1.2rem;
+    font-size: 1.1rem;
+}
+
+.api-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.api-btn {
+    justify-content: flex-start;
+    gap: 0.5rem;
+    background: #f8fafc;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.api-btn:hover {
+    background: #f1f5f9;
+    transform: translateY(-1px);
+}
+
+/* ====== FOOTER ====== */
+.dashboard-footer {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+    width: 100%;
+}
+
+.dashboard-footer .muted {
+    color: #718096;
+    margin: 0;
+}
+
+/* ====== UTILIDADES ====== */
+.full-width {
+    width: 100% !important;
+}
+
+.grid {
+    display: grid;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 1200px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .grid-4,
+    .grid-3,
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .api-section {
+        padding: 1.5rem;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .metric-card {
+        padding: 1.2rem;
+    }
+    
+    .metric-value {
+        font-size: 1.8rem;
+    }
+    
+    .action-card,
+    .category-card {
+        padding: 1.2rem;
+    }
+}
+</style>
+{% endblock %}

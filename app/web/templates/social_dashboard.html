@@ -1,0 +1,701 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .dashboard-container {
+        display: grid;
+        gap: 2rem;
+    }
+
+    /* Notificaciones */
+    .notification {
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+
+    .notification--success {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    .notification--error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    /* Acciones y Fuentes */
+    .actions-sources-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .actions-section,
+    .sources-section {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid #e2e8f0;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .action-item {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.25rem;
+        transition: all 0.2s ease;
+    }
+
+    .action-item:hover {
+        border-color: #cbd5e1;
+        background: #f1f5f9;
+    }
+
+    .action-item h4 {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .action-desc {
+        margin: 0.5rem 0 1rem 0;
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    .sources-list {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .source-item {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+
+    .source-item:hover {
+        border-color: #cbd5e1;
+    }
+
+    .source-item--disabled {
+        opacity: 0.6;
+        background: #f1f5f9;
+    }
+
+    .source-info {
+        flex: 1;
+    }
+
+    .source-name a {
+        color: #0077cc;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .source-name a:hover {
+        text-decoration: underline;
+    }
+
+    .network-badge {
+        display: inline-block;
+        padding: 0.3rem 0.7rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    .source-status {
+        display: block;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 3px;
+        width: fit-content;
+    }
+
+    .status-active {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-inactive {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .source-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn--icon {
+        padding: 0.5rem;
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+
+    .btn--sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .add-source-form {
+        border-top: 1px solid #e2e8f0;
+        padding-top: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .form-section-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #1e293b;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: #1e293b;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.6rem 0.8rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-family: inherit;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn--block {
+        width: 100%;
+    }
+
+    @media (max-width: 900px) {
+        .actions-sources-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Mensajes flash -->
+    {% if request.query_params.get('msg') %}
+    <div class="notification notification--success">
+        ✅ {{ request.query_params.get('msg') }}
+    </div>
+    {% endif %}
+
+    {% if request.query_params.get('err') %}
+    <div class="notification notification--error">
+        ⚠️ {{ request.query_params.get('err') }}
+    </div>
+    {% endif %}
+
+    <!-- Acciones y Fuentes Monitoreadas -->
+    <div class="actions-sources-grid">
+        <!-- Acciones Rápidas -->
+        <section class="actions-section">
+            <h3 class="section-title">⚡ Acciones Rápidas</h3>
+            <div class="actions-grid">
+                <!-- Twitter -->
+                <div class="action-item">
+                    <h4>🐦 Twitter</h4>
+                    <p class="action-desc">Scrapear tweets de noticieros</p>
+                    <form action="/api/social/twitter/scrape" method="post" style="display: inline-block; width: 100%;">
+                        <button type="submit" class="btn btn-primary btn--block btn--sm">
+                            🔄 Ejecutar
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Facebook -->
+                <div class="action-item">
+                    <h4>👍 Facebook</h4>
+                    <p class="action-desc">Scrapear posts de noticieros</p>
+                    <form action="/api/social/facebook/scrape" method="post" style="display: inline-block; width: 100%;">
+                        <button type="submit" class="btn btn-primary btn--block btn--sm">
+                            🔄 Ejecutar
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Instagram -->
+                <div class="action-item">
+                    <h4>📷 Instagram</h4>
+                    <p class="action-desc">Scrapear fotos y posts</p>
+                    <form action="/api/social/instagram/scrape" method="post" style="display: inline-block; width: 100%;">
+                        <button type="submit" class="btn btn-primary btn--block btn--sm">
+                            🔄 Ejecutar
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Todas las redes -->
+                <div class="action-item">
+                    <h4>🌐 Todas</h4>
+                    <p class="action-desc">Scrapear todas las redes sociales</p>
+                    <form action="/api/social/all/scrape" method="post" style="display: inline-block; width: 100%;">
+                        <button type="submit" class="btn btn-primary btn--block btn--sm" style="background: #059669;">
+                            🚀 Ejecutar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fuentes Monitoreadas -->
+        <section class="sources-section">
+            <h3 class="section-title">
+                📱 Fuentes Monitoreadas
+                <span class="badge">{{ social_fuentes|length }}</span>
+            </h3>
+
+            {% if social_fuentes and social_fuentes|length > 0 %}
+            <div class="sources-list">
+                {% for fuente in social_fuentes %}
+                    {# Detectar red social basada en URL #}
+                    {% set network = 'unknown' %}
+                    {% if 'twitter.com' in fuente.url_listado.lower() or 'x.com' in fuente.url_listado.lower() %}
+                        {% set network = 'twitter' %}
+                    {% elif 'facebook.com' in fuente.url_listado.lower() %}
+                        {% set network = 'facebook' %}
+                    {% elif 'instagram.com' in fuente.url_listado.lower() %}
+                        {% set network = 'instagram' %}
+                    {% endif %}
+
+                    <div class="source-item {% if not fuente.habilitada %}source-item--disabled{% endif %}">
+                        <div class="source-info">
+                            <h4 class="source-name">
+                                <a href="{{ fuente.url_listado }}" target="_blank">
+                                    {{ fuente.nombre or fuente.url_listado.split('/')[-1] }}
+                                </a>
+                            </h4>
+                            <span class="network-badge">
+                                {% if network == 'twitter' %}
+                                    🐦 Twitter
+                                {% elif network == 'facebook' %}
+                                    👍 Facebook
+                                {% elif network == 'instagram' %}
+                                    📷 Instagram
+                                {% else %}
+                                    🌐 Red Social
+                                {% endif %}
+                            </span>
+                            <span class="source-status status-{{ 'active' if fuente.habilitada else 'inactive' }}">
+                                {{ '✓ Activa' if fuente.habilitada else '✗ Inactiva' }}
+                            </span>
+                        </div>
+                        <div class="source-actions">
+                            <form action="/api/social/web/social/{{ fuente.id }}/scrape" method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-secondary btn--icon btn--sm" title="Scrapear">
+                                    🔄
+                                </button>
+                            </form>
+                            {% if fuente.habilitada %}
+                            <form action="/api/social/web/social/{{ fuente.id }}/disable" method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-secondary btn--icon btn--sm" title="Pausar">
+                                    ⏸️
+                                </button>
+                            </form>
+                            {% else %}
+                            <form action="/api/social/web/social/{{ fuente.id }}/enable" method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-secondary btn--icon btn--sm" title="Activar">
+                                    ▶️
+                                </button>
+                            </form>
+                            {% endif %}
+                            <form action="/api/social/web/social/{{ fuente.id }}/delete" method="post" style="display: inline;" onsubmit="return confirm('¿Eliminar esta fuente?')">
+                                <button type="submit" class="btn btn-secondary btn--icon btn--sm" title="Eliminar">
+                                    🗑️
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="text-align: center; color: #64748b; padding: 1rem;">
+                No hay fuentes monitoreadas. Agrega una nueva debajo.
+            </p>
+            {% endif %}
+
+            <!-- Agregar Nueva Fuente -->
+            <form action="/api/social/web/social/add" method="post" class="add-source-form">
+                <h4 class="form-section-title">➕ Agregar Nueva Fuente</h4>
+
+                <div class="form-group">
+                    <label class="form-label">URL del perfil</label>
+                    <input
+                        type="url"
+                        name="url_listado"
+                        class="form-input"
+                        placeholder="https://x.com/usuario"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Nombre personalizado</label>
+                    <input
+                        type="text"
+                        name="nombre"
+                        class="form-input"
+                        placeholder="ej: Mi Diario"
+                    />
+                </div>
+
+                <input type="hidden" name="scrape_now" value="1" />
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn--block">
+                        💾 Guardar y Scrapear
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
+    <!-- Estadísticas -->
+    <section style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+        <h2 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1.5rem; color: #1e293b;">📊 Estadísticas de Contenido</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+            <!-- Total Posts -->
+            <div style="background: #f0f9ff; border: 2px solid #bfdbfe; border-radius: 8px; padding: 1.5rem; text-align: center;">
+                <div style="font-size: 0.9rem; color: #1e40af; font-weight: 600; margin-bottom: 0.5rem;">Total Posts</div>
+                <div style="font-size: 2.5rem; font-weight: 700; color: #1e40af;">{{ stats.total_posts }}</div>
+            </div>
+
+            <!-- Twitter -->
+            <div style="background: #eff6ff; border: 2px solid #bfdbfe; border-radius: 8px; padding: 1.5rem; text-align: center;">
+                <div style="font-size: 0.9rem; color: #1da1f2; font-weight: 600; margin-bottom: 0.5rem;">🐦 Tweets</div>
+                <div style="font-size: 2.5rem; font-weight: 700; color: #1da1f2;">{{ stats.twitter_count }}</div>
+                <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem;">{{ "%.1f"|format(stats.twitter_count / (stats.total_posts or 1) * 100) }}% del total</div>
+            </div>
+
+            <!-- Facebook -->
+            <div style="background: #eff6ff; border: 2px solid #93c5fd; border-radius: 8px; padding: 1.5rem; text-align: center;">
+                <div style="font-size: 0.9rem; color: #3b5998; font-weight: 600; margin-bottom: 0.5rem;">👍 Facebook</div>
+                <div style="font-size: 2.5rem; font-weight: 700; color: #3b5998;">{{ stats.facebook_count }}</div>
+                <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem;">{{ "%.1f"|format(stats.facebook_count / (stats.total_posts or 1) * 100) }}% del total</div>
+            </div>
+
+            <!-- Última Actualización -->
+            <div style="background: #f0fdf4; border: 2px solid #bbf7d0; border-radius: 8px; padding: 1.5rem; text-align: center;">
+                <div style="font-size: 0.9rem; color: #166534; font-weight: 600; margin-bottom: 0.5rem;">⏰ Última Actualización</div>
+                <div style="font-size: 1rem; font-weight: 600; color: #166534;">{{ stats.ultimo_scraping }}</div>
+            </div>
+
+            <!-- Noticieros Monitoreados -->
+            <div style="background: #faf5ff; border: 2px solid #e9d5ff; border-radius: 8px; padding: 1.5rem; text-align: center;">
+                <div style="font-size: 0.9rem; color: #7c3aed; font-weight: 600; margin-bottom: 0.5rem;">📰 Noticieros</div>
+                <div style="font-size: 2.5rem; font-weight: 700; color: #7c3aed;">{{ stats.noticieros_monitoreados }}</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gráficos -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+        <!-- Gráfico de Barras -->
+        <section style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem; color: #1e293b;">📊 Posts por Red Social</h3>
+            
+            {% if stats.platform_counts and stats.platform_counts|length > 0 %}
+            <div style="display: flex; align-items: flex-end; justify-content: center; gap: 1.5rem; height: 250px;">
+                {% for platform, count in stats.platform_counts.items() %}
+                    {% set percentage = (count / (stats.total_posts or 1) * 100) %}
+                    {% set colors = {'twitter': '#1da1f2', 'facebook': '#3b5998', 'instagram': '#f58529'} %}
+                    {% set color = colors.get(platform, '#6b7280') %}
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                        <div style="height: {{ 150 * percentage / 100 }}px; width: 40px; background: {{ color }}; border-radius: 4px; min-height: 10px; display: flex; align-items: flex-end; justify-content: center;">
+                            <span style="color: white; font-weight: 700; padding-bottom: 0.5rem; font-size: 0.85rem;">{{ count }}</span>
+                        </div>
+                        <span style="font-size: 0.8rem; font-weight: 600; color: #64748b;">{{ platform | capitalize }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; color: #64748b; padding: 2rem;">
+                <p>No hay datos para mostrar. Ejecuta un scraping primero.</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Gráfico de Líneas -->
+        <section style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem; color: #1e293b;">📈 Tendencia (Últimos 7 días)</h3>
+            
+            {% if stats.chart_dates and stats.chart_dates|length > 0 and stats.chart_platforms %}
+            <div style="height: 250px;">
+                <canvas id="lineChart"></canvas>
+            </div>
+            {% else %}
+            <div style="text-align: center; color: #64748b; padding: 2rem;">
+                <p>No hay datos históricos. Ejecuta scrapeos en diferentes días.</p>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <!-- Posts Recientes -->
+    <section style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; margin-top: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.2rem; font-weight: 600; color: #1e293b;">📱 Posts Recientes</h2>
+            <a href="/api/social/posts" class="btn btn-secondary" style="text-decoration: none;">
+                Ver todos →
+            </a>
+        </div>
+
+        {% if posts and posts|length > 0 %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+            {% for p in posts[:12] %}
+            <article style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; overflow: hidden;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                    <span style="display: inline-block; padding: 0.3rem 0.7rem; background: {% if p.platform == 'twitter' %}#1da1f2{% elif p.platform == 'facebook' %}#3b5998{% else %}#6b7280{% endif %}; color: white; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                        {{ p.platform | upper }}
+                    </span>
+                    <time style="font-size: 0.8rem; color: #64748b;">{{ p.created_at.strftime('%d/%m %H:%M') if p.created_at else 'N/A' }}</time>
+                </div>
+                <p style="font-size: 0.9rem; color: #334155; margin-bottom: 0.75rem; line-height: 1.5;">
+                    {{ p.text[:100] }}{% if p.text and p.text|length > 100 %}...{% endif %}
+                </p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.8rem; color: #64748b;">{{ p.source or p.platform }}</span>
+                    {% if p.url %}
+                    <a href="{{ p.url }}" target="_blank" class="btn btn-secondary btn--sm" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; text-decoration: none;">
+                        🔗 Ver
+                    </a>
+                    {% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; color: #64748b; padding: 2rem;">
+            <p>😴 No hay posts recientes</p>
+            <p style="font-size: 0.9rem;">Ejecuta un scraping para comenzar a recopilar contenido.</p>
+        </div>
+        {% endif %}
+    </section>
+</div>
+
+    
+<script id="chartDataJson" type="application/json">{{ chart_json | safe }}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+
+<style>
+/* ===== GRÁFICOS GRID (Modern) ===== */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.chart-container--bars,
+.chart-container--lines {
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,252,0.9));
+    border: 1px solid rgba(15, 23, 42, 0.04);
+}
+
+/* ===== BARRAS VERTICALES (modern, rounded + shadow) ===== */
+.chart-body--bars { display:flex; align-items:flex-end; justify-content:center; padding: 1rem 0; min-height: 260px }
+.bar-chart-vertical { display:flex; align-items:flex-end; justify-content:space-around; gap:1rem; width:100%; height:220px }
+.vertical-bar-item { display:flex; flex-direction:column; align-items:center; gap:0.5rem; flex:1; max-width:100px }
+.vertical-bar-wrapper { width:100%; height:100%; display:flex; align-items:flex-end; justify-content:center; border-radius:12px; overflow:visible; position:relative }
+.vertical-bar-track { width:70%; border-radius:12px 12px 0 0; transition: height 600ms cubic-bezier(.2,.8,.2,1); min-height:6px; box-shadow: 0 6px 18px rgba(2,6,23,0.06); display:flex; align-items:flex-end; justify-content:center; position:relative }
+.vertical-bar-track .bar-value { color: #fff; font-weight:700; font-size:0.85rem; position:absolute; top:-22px }
+
+.vertical-bar-track--twitter { background: linear-gradient(180deg, #1da1f2, #0d95e8) }
+.vertical-bar-track--facebook { background: linear-gradient(180deg, #3b5998, #2d4473) }
+.vertical-bar-track--instagram { background: linear-gradient(180deg, #f58529, #dd2a7b) }
+.vertical-bar-track--unknown { background: linear-gradient(180deg, #9ca3af, #6b7280) }
+
+.vertical-bar-label { font-size:0.78rem; font-weight:600; color:var(--gray-700); text-align:center }
+
+/* ===== LÍNEA (modern look) ===== */
+.chart-body--lines { display:flex; flex-direction:column; padding:0.75rem; min-height:260px }
+.line-chart-wrapper { width:100%; height:240px; position:relative }
+#lineChart { width:100%; height:100%; }
+.line-chart-legend { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-top:0.75rem }
+.legend-item { display:flex; align-items:center; gap:0.5rem; font-weight:600; color:var(--gray-700) }
+.legend-color { width:12px; height:12px; border-radius:6px; display:inline-block; box-shadow: 0 2px 6px rgba(2,6,23,0.12) }
+.legend-item--twitter .legend-color { background: linear-gradient(90deg, #1da1f2, #0d95e8) }
+.legend-item--facebook .legend-color { background: linear-gradient(90deg, #3b5998, #2d4473) }
+.legend-item--instagram .legend-color { background: linear-gradient(90deg, #f58529, #dd2a7b) }
+.legend-item--unknown .legend-color { background: linear-gradient(90deg, #9ca3af, #6b7280) }
+
+/* Responsive tweaks */
+@media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } .bar-chart-vertical { height: 180px } }
+
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aplicar height dinámico a las barras verticales
+        const verticalBars = document.querySelectorAll('.vertical-bar-track');
+        verticalBars.forEach(bar => {
+            const height = parseInt(bar.getAttribute('data-height') || '0', 10);
+            const final = Math.max(6, Math.min(100, height));
+            // allow CSS transition to animate
+            requestAnimationFrame(() => { bar.style.height = final + '%'; });
+        });
+
+        // Renderizar gráfico de líneas si existen datos
+        const lineChartCanvas = document.getElementById('lineChart');
+        if (lineChartCanvas) { renderLineChart(); }
+    });
+
+function renderLineChart() {
+    let chartData;
+    try {
+        const el = document.getElementById('chartDataJson');
+        chartData = el ? JSON.parse(el.textContent) : null;
+    } catch (e) {
+        console.error('Error parsing chart data:', e);
+        return;
+    }
+    if (!chartData) return;
+
+    const platformColors = {
+        'twitter': ['#1da1f2', '#0d95e8'],
+        'facebook': ['#3b5998', '#2d4473'],
+        'instagram': ['#f58529', '#dd2a7b'],
+        'unknown': ['#9ca3af', '#6b7280']
+    };
+
+    const canvas = document.getElementById('lineChart');
+    const ctx = canvas.getContext('2d');
+
+    const labels = (chartData.dates || []).map(d => d.split('-').pop());
+
+    const datasets = Object.entries(chartData.platforms || {}).map(([platform, data]) => {
+        const colors = platformColors[platform] || platformColors.unknown;
+        // create vertical gradient (top -> bottom) for fill
+        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height || 240);
+        grad.addColorStop(0, hexToRgba(colors[0], 0.16));
+        grad.addColorStop(1, hexToRgba(colors[1], 0.02));
+
+        return {
+            label: platform.charAt(0).toUpperCase() + platform.slice(1),
+            data: data,
+            borderColor: colors[0],
+            backgroundColor: grad,
+            tension: 0.36,
+            fill: true,
+            borderWidth: 3,
+            pointRadius: 4,
+            pointHoverRadius: 7,
+            pointBackgroundColor: colors[0],
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            spanGaps: true
+        };
+    });
+
+    // destroy previous instance if any
+    if (window._socialLineChart instanceof Chart) { window._socialLineChart.destroy(); }
+
+    window._socialLineChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: labels, datasets: datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: true, mode: 'index', position: 'nearest' }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { color: '#374151', maxTicksLimit: 6 }, grid: { color: 'rgba(2,6,23,0.06)' } },
+                x: { ticks: { color: '#6b7280' }, grid: { display: false } }
+            }
+        }
+    });
+
+    // update legend color dots to match (in case platforms are dynamic)
+    const legendItems = document.querySelectorAll('.legend-item');
+    legendItems.forEach(item => {
+        const cls = Array.from(item.classList).find(c => c.startsWith('legend-item--')) || '';
+        if (!cls) return;
+        const platform = cls.replace('legend-item--','');
+        const colors = platformColors[platform] || platformColors.unknown;
+        const dot = item.querySelector('.legend-color');
+        if (dot) dot.style.background = `linear-gradient(90deg, ${colors[0]}, ${colors[1]})`;
+    });
+}
+
+// helper: convert hex to rgba
+function hexToRgba(hex, alpha) {
+    // if already rgb
+    if (hex.startsWith('rgb')) return hex;
+    const h = hex.replace('#','');
+    const r = parseInt(h.substring(0,2),16);
+    const g = parseInt(h.substring(2,4),16);
+    const b = parseInt(h.substring(4,6),16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+</script>
+{% endblock %}

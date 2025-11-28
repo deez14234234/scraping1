@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 style="margin-top:0;">Resultados de búsqueda</h2>
+
+<form method="get" action="/web/search" style="margin:.8rem 0; display:flex; gap:.5rem; flex-wrap:wrap;">
+  <input type="text" name="q" value="{{ q or '' }}" placeholder="Buscar en noticias..." style="padding:.5rem;flex:1;min-width:240px;">
+  <input type="number" min="1" max="200" name="limit" value="{{ limit or 50 }}" title="Resultados por página" style="padding:.5rem; width:120px;">
+  <input type="hidden" name="offset" value="{{ offset or 0 }}">
+  <input class="btn btn-primary" type="submit" value="Buscar">
+  {% if q %}
+    <a class="btn" href="/web/search">Limpiar</a>
+  {% endif %}
+</form>
+
+{% if q %}
+  <p class="muted">Buscando: <strong>{{ q }}</strong></p>
+{% endif %}
+{% if total is defined %}
+  <p class="muted">Resultados encontrados: {{ total }}</p>
+{% endif %}
+
+{% if rows and rows|length %}
+  <ul style="list-style:none; padding:0; margin:1rem 0;">
+    {% for n in rows %}
+    <li class="card" style="margin-bottom:1rem;">
+      <div class="row">
+        {% set img_src = None %}
+        {% if n.imagen_path and 'data/images/' in n.imagen_path %}
+          {% set img_src = '/images/' + n.imagen_path.split('data/images/')[-1] %}
+        {% elif n.imagen_path and n.imagen_path.startswith('http') %}
+          {% set img_src = n.imagen_path %}
+        {% endif %}
+
+        {% if img_src %}
+          <img class="thumb" src="{{ img_src }}" alt="imagen de la noticia" loading="lazy">
+        {% endif %}
+
+        <div class="grow">
+          <a href="{{ n.url }}" target="_blank" rel="noopener"><strong>{{ n.titulo }}</strong></a>
+          <div class="muted" style="font-size:.9rem;">
+            {{ n.fuente }} · {{ (n.fecha_publicacion or n.created_at) }}
+          </div>
+          <p style="margin-top:.4rem; white-space: pre-line;">
+            {{ n.contenido[:300] }}{% if n.contenido and n.contenido|length > 300 %}…{% endif %}
+          </p>
+          <div style="margin-top:.4rem;">
+            <a class="btn" href="/web/news/{{ n.id }}">Ver detalle</a>
+          </div>
+        </div>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <div class="pagination">
+    {% set prev_offset = (offset or 0) - (limit or 50) %}
+    {% set next_offset = (offset or 0) + (limit or 50) %}
+    {% if (offset or 0) > 0 %}
+      <a class="btn" href="/web/search?q={{ q|urlencode }}&limit={{ limit or 50 }}&offset={{ prev_offset if prev_offset>0 else 0 }}">← Anterior</a>
+    {% endif %}
+    {% if has_next %}
+      <a class="btn" href="/web/search?q={{ q|urlencode }}&limit={{ limit or 50 }}&offset={{ next_offset }}">Siguiente →</a>
+    {% endif %}
+  </div>
+{% else %}
+  <p>No se encontraron noticias.</p>
+{% endif %}
+
+<p style="margin-top:1rem;"><a href="/">Inicio</a> · <a href="/web/news">Ver todas las noticias</a></p>
+{% endblock %}

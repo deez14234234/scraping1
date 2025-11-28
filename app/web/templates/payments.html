@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="card">
+    <h2>Planes de Pago</h2>
+    <p class="muted">Elige el plan que mejor se adapte a tus necesidades. A continuación se muestran las diferencias y beneficios.</p>
+  </div>
+
+  <div style="height:1rem"></div>
+
+  <div class="payments-grid">
+    <div class="plan-card">
+      <div style="display:flex; justify-content:space-between; align-items:center">
+        <div>
+          <div style="font-size:1.05rem; font-weight:700">Premium</div>
+          <div class="muted">Acceso completo y prioridad</div>
+        </div>
+        <div class="price">$19/mes</div>
+      </div>
+      <div class="muted">Beneficios:</div>
+      <ul style="margin-left:1rem; color:#0f172a;">
+        <li>• Acceso en tiempo real a alertas avanzadas.</li>
+        <li>• Exportes ilimitados y filtros avanzados.</li>
+        <li>• Prioridad en soporte y actualizaciones.</li>
+        <li>• Integración con APIs privadas.</li>
+      </ul>
+      <div style="flex:1"></div>
+      <button class="btn subscribe-btn" data-plan="Premium" data-price="$19/mes">Contratar Premium</button>
+    </div>
+
+    <div class="plan-card">
+      <div style="display:flex; justify-content:space-between; align-items:center">
+        <div>
+          <div style="font-size:1.05rem; font-weight:700">Normal</div>
+          <div class="muted">Funcionalidad básica</div>
+        </div>
+        <div class="price">$0</div>
+      </div>
+      <div class="muted">Beneficios:</div>
+      <ul style="margin-left:1rem; color:#0f172a;">
+        <li>• Acceso a lectura de noticias y panel básico.</li>
+        <li>• Exportes limitados (CSV/JSON).</li>
+        <li>• Actualizaciones periódicas del scrapper.</li>
+        <li>• Comunidad y documentación.</li>
+      </ul>
+      <div style="flex:1"></div>
+      <button class="btn btn-secondary subscribe-btn" data-plan="Normal" data-price="$0">Usar cuenta gratuita</button>
+    </div>
+  </div>
+
+<!-- Modal -->
+<div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h3 id="modalTitle">Suscribirse</h3>
+    <div id="modalPlan" style="font-weight:700; margin-bottom:0.4rem"></div>
+    <form id="subscribeForm">
+      <div class="form-row">
+        <label class="muted">Correo</label>
+        <input type="email" name="email" placeholder="tu@correo.com" required />
+      </div>
+      <div class="form-row">
+        <label class="muted">Nombre (opcional)</label>
+        <input type="text" name="name" placeholder="Tu nombre" />
+      </div>
+      <input type="hidden" name="plan" />
+      <div class="actions">
+        <button type="button" id="cancelBtn" class="btn btn-secondary">Cancelar</button>
+        <button type="submit" class="btn">Confirmar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% block extra_js %}
+  {{ super() }}
+  <script>
+    (function(){
+      const buttons = document.querySelectorAll('.subscribe-btn');
+      const backdrop = document.getElementById('modalBackdrop');
+      const planEl = document.getElementById('modalPlan');
+      const form = document.getElementById('subscribeForm');
+      const cancel = document.getElementById('cancelBtn');
+
+      function openModal(plan, price){
+        planEl.textContent = plan + ' — ' + price;
+        form.plan.value = plan;
+        backdrop.style.display = 'flex';
+      }
+
+      function closeModal(){ backdrop.style.display = 'none'; }
+
+      buttons.forEach(b=> b.addEventListener('click', e=>{
+        const plan = b.dataset.plan || 'Normal';
+        const price = b.dataset.price || '$0';
+        openModal(plan, price);
+      }));
+
+      cancel.addEventListener('click', closeModal);
+      backdrop.addEventListener('click', function(e){ if (e.target === backdrop) closeModal(); });
+
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        const data = new FormData(form);
+        // simulación: mostrar confirmación simple
+        const plan = data.get('plan');
+        const email = data.get('email');
+        closeModal();
+        alert('Gracias — ' + (email || 'usuario') + '\nPlan: ' + plan + '\n(Esto es una simulación)');
+      });
+    })();
+  </script>
+{% endblock %}
+
+{% endblock %}

@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Admin Dashboard - NexNews</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --dark: #1e293b;
+      --light: #f8fafc;
+      --gray: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    .admin-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Header */
+    .admin-header {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+      border: 1px solid var(--border);
+    }
+
+    .admin-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .admin-subtitle {
+      color: var(--gray);
+      font-size: 1.1rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: between;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+
+    .stat-title {
+      font-size: 0.9rem;
+      color: var(--gray);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-icon {
+      font-size: 1.5rem;
+      opacity: 0.8;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--dark);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-trend {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .trend-up { color: var(--success); }
+    .trend-down { color: var(--danger); }
+
+    /* Tabs */
+    .admin-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      background: white;
+      padding: 1rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+    }
+
+    .tab {
+      padding: 1rem 1.5rem;
+      background: none;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--gray);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tab.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .tab:hover:not(.active) {
+      background: var(--light);
+    }
+
+    /* Sections */
+    .section {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+      border: 1px solid var(--border);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--light);
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+    }
+
+    .table th {
+      background: var(--light);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--dark);
+      border-bottom: 2px solid var(--border);
+    }
+
+    .table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .table tr:hover {
+      background: #f8fafc;
+    }
+
+    /* Badges */
+    .badge {
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fecaca; color: #991b1b; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+    .badge-premium { background: linear-gradient(135deg, #8b5cf6, #ec4899); color: white; }
+    .badge-free { background: #f1f5f9; color: #475569; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-secondary { background: var(--light); color: var(--dark); border: 1px solid var(--border); }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary), #06b6d4);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      padding: 1rem;
+      background: var(--light);
+      border-radius: 10px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .filter-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--gray);
+    }
+
+    .filter-select, .filter-input {
+      padding: 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      font-size: 0.9rem;
+      min-width: 150px;
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding: 1rem;
+    }
+
+    .pagination-info {
+      font-weight: 600;
+      color: var(--gray);
+    }
+
+    /* Status Messages */
+    .status-message {
+      padding: 1rem;
+      border-radius: 10px;
+      margin: 1rem 0;
+      font-weight: 600;
+    }
+
+    .status-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .status-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .admin-container {
+        padding: 1rem;
+      }
+
+      .admin-title {
+        font-size: 2rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-tabs {
+        flex-direction: column;
+      }
+
+      .section {
+        padding: 1rem;
+      }
+
+      .section-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+      }
+
+      .filters {
+        flex-direction: column;
+      }
+
+      .filter-select, .filter-input {
+        min-width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  {% include 'base.html' %}
+
+  {% block content %}
+  <div class="admin-container">
+    <!-- Header -->
+    <div class="admin-header">
+      <h1 class="admin-title">👑 Dashboard Administrativo</h1>
+      <p class="admin-subtitle">Gestión completa de usuarios, transacciones y suscripciones Premium</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-title">Usuarios Totales</div>
+          <div class="stat-icon">👥</div>
+        </div>
+        <div class="stat-value">{{ total_usuarios or '0' }}</div>
+        <div class="stat-trend trend-up">↑ 12% este mes</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-title">Usuarios Premium</div>
+          <div class="stat-icon">💎</div>
+        </div>
+        <div class="stat-value">{{ premium_users|length or '0' }}</div>
+        <div class="stat-trend trend-up">↑ 8% este mes</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-title">Ingresos Mensuales</div>
+          <div class="stat-icon">💰</div>
+        </div>
+        <div class="stat-value">S/ {{ ingresos_mensuales or '0' }}</div>
+        <div class="stat-trend trend-up">↑ 15% este mes</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-title">Trials Activos</div>
+          <div class="stat-icon">⏰</div>
+        </div>
+        <div class="stat-value">{{ trials_activos or '0' }}</div>
+        <div class="stat-trend trend-down">↓ 3% esta semana</div>
+      </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="admin-tabs">
+      <button class="tab active" onclick="mostrarTab('premium')">
+        <span>💎</span>
+        Usuarios Premium
+      </button>
+      <button class="tab" onclick="mostrarTab('fuentes')">
+        <span>🌐</span>
+        Fuentes
+      </button>
+      <button class="tab" onclick="mostrarTab('noticias')">
+        <span>📰</span>
+        Noticias
+      </button>
+      <button class="tab" onclick="mostrarTab('movimientos')">
+        <span>📊</span>
+        Movimientos
+      </button>
+    </div>
+
+    <!-- Tab: Usuarios Premium -->
+    <div id="tab-premium" class="tab-content">
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span>💎</span>
+            Gestión de Usuarios Premium & Trials
+          </h2>
+          <div class="section-actions">
+            <button class="btn btn-primary" onclick="enviarRecordatorios()">
+              <span>📣</span>
+              Enviar Recordatorios
+            </button>
+            <a href="/web/admin/movements/export.csv" class="btn btn-secondary">
+              <span>⬇️</span>
+              Exportar CSV
+            </a>
+          </div>
+        </div>
+
+        <div class="filters">
+          <div class="filter-group">
+            <label class="filter-label">Estado Trial</label>
+            <select class="filter-select" onchange="filtrarUsuarios()">
+              <option value="all">Todos</option>
+              <option value="active">Activos</option>
+              <option value="expiring">Por expirar</option>
+              <option value="expired">Expirados</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Recordatorio</label>
+            <select class="filter-select" onchange="filtrarUsuarios()">
+              <option value="all">Todos</option>
+              <option value="sent">Enviado</option>
+              <option value="not-sent">No enviado</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="remind-status" class="status-message" style="display: none;"></div>
+
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Plan</th>
+                <th>Estado</th>
+                <th>Días Restantes</th>
+                <th>Recordatorio</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in premium_users %}
+              <tr>
+                <td>
+                  <div style="font-weight: 600;">{{ u.email }}</div>
+                  <div style="font-size: 0.8rem; color: var(--gray);">ID: {{ u.id }}</div>
+                </td>
+                <td>
+                  <span class="badge badge-premium">Premium</span>
+                </td>
+                <td>
+                  {% set dias_restantes = (u.plan_trial_expires - now).days if u.plan_trial_expires and now else 0 %}
+                  {% if dias_restantes > 7 %}
+                    <span class="badge badge-success">Activo</span>
+                  {% elif dias_restantes > 0 %}
+                    <span class="badge badge-warning">Por expirar</span>
+                  {% else %}
+                    <span class="badge badge-danger">Expirado</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div style="font-weight: 600; color: {% if dias_restantes > 7 %}var(--success){% elif dias_restantes > 0 %}var(--warning){% else %}var(--danger){% endif %};">
+                    {{ dias_restantes }} días
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ (30 - dias_restantes) / 30 * 100 }}%"></div>
+                  </div>
+                </td>
+                <td>
+                  {% if u.plan_trial_reminder_sent %}
+                    <span class="badge badge-info">Enviado</span>
+                    <div style="font-size: 0.8rem; color: var(--gray);">{{ u.plan_trial_reminder_sent.strftime('%d/%m %H:%M') }}</div>
+                  {% else %}
+                    <span class="badge badge-secondary">Pendiente</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-secondary btn-sm" onclick="extenderTrial({{ u.id }})">
+                      <span>⏱️</span>
+                      Extender
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="suspenderUsuario({{ u.id }})">
+                      <span>⏸️</span>
+                      Pausar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Fuentes -->
+    <div id="tab-fuentes" class="tab-content" style="display: none;">
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span>🌐</span>
+            Fuentes Recientes (Últimas 20)
+          </h2>
+          <div class="section-actions">
+            <button class="btn btn-secondary" onclick="exportarFuentes()">
+              <span>📊</span>
+              Exportar
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Fuente</th>
+                <th>Usuario</th>
+                <th>Estado</th>
+                <th>Scrapeos</th>
+                <th>Última Actividad</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for f in recent_fuentes %}
+              <tr>
+                <td>
+                  <div style="font-weight: 600;">{{ f.nombre or 'Sin nombre' }}</div>
+                  <a href="{{ f.url_listado }}" target="_blank" style="font-size: 0.8rem; color: var(--primary);">
+                    {{ f.url_listado|truncate(40) }}
+                  </a>
+                </td>
+                <td>
+                  <div style="font-weight: 600;">ID: {{ f.usuario_id or 'N/A' }}</div>
+                  <div style="font-size: 0.8rem; color: var(--gray);">{{ f.created_at.strftime('%d/%m/%Y') if f.created_at else '-' }}</div>
+                </td>
+                <td>
+                  {% if f.habilitada %}
+                    <span class="badge badge-success">Activa</span>
+                  {% else %}
+                    <span class="badge badge-danger">Inactiva</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div style="font-weight: 600;">{{ f.scrape_count or '0' }}</div>
+                </td>
+                <td>
+                  {{ f.last_scraped_at.strftime('%d/%m %H:%M') if f.last_scraped_at else 'Nunca' }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Noticias -->
+    <div id="tab-noticias" class="tab-content" style="display: none;">
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span>📰</span>
+            Noticias Recientes (Últimas 50)
+          </h2>
+          <div class="section-actions">
+            <button class="btn btn-secondary" onclick="exportarNoticias()">
+              <span>📊</span>
+              Exportar
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Noticia</th>
+                <th>Fuente</th>
+                <th>Categoría</th>
+                <th>Fecha Publicación</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for n in recent_noticias %}
+              <tr>
+                <td>
+                  <div style="font-weight: 600; margin-bottom: 0.25rem;">{{ n.titulo|truncate(60) }}</div>
+                  <div style="font-size: 0.8rem; color: var(--gray);">ID: {{ n.id }}</div>
+                </td>
+                <td>
+                  <span class="badge badge-info">{{ n.fuente }}</span>
+                </td>
+                <td>
+                  {% if n.categoria %}
+                    <span class="badge badge-secondary">{{ n.categoria }}</span>
+                  {% else %}
+                    <span class="badge badge-free">Sin categoría</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div style="font-weight: 600;">{{ n.fecha_publicacion.strftime('%d/%m/%Y') if n.fecha_publicacion else '-' }}</div>
+                  <div style="font-size: 0.8rem; color: var(--gray);">{{ n.created_at.strftime('%H:%M') if n.created_at else '' }}</div>
+                </td>
+                <td>
+                  <a href="/web/news/{{ n.id }}" class="btn btn-secondary btn-sm" target="_blank">
+                    <span>👁️</span>
+                    Ver
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Movimientos -->
+    <div id="tab-movimientos" class="tab-content" style="display: none;">
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span>📊</span>
+            Movimientos del Sistema
+          </h2>
+          <div class="section-actions">
+            <button class="btn btn-secondary" onclick="exportarMovimientos()">
+              <span>📊</span>
+              Exportar
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Movimiento</th>
+                <th>Usuario</th>
+                <th>Acción</th>
+                <th>Detalles</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in recent_movimientos %}
+              <tr>
+                <td>
+                  <div style="font-weight: 600;">#{{ m.id }}</div>
+                </td>
+                <td>
+                  <div style="font-weight: 600;">ID: {{ m.actor_id or 'Sistema' }}</div>
+                </td>
+                <td>
+                  <span class="badge 
+                    {% if 'crear' in m.accion %}badge-success
+                    {% elif 'eliminar' in m.accion %}badge-danger
+                    {% elif 'actualizar' in m.accion %}badge-warning
+                    {% else %}badge-info{% endif %}">
+                    {{ m.accion }}
+                  </span>
+                </td>
+                <td style="max-width: 300px;">
+                  <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    {{ m.detalle }}
+                  </div>
+                </td>
+                <td>
+                  <div style="font-weight: 600;">{{ m.created_at.strftime('%d/%m/%Y') if m.created_at else '-' }}</div>
+                  <div style="font-size: 0.8rem; color: var(--gray);">{{ m.created_at.strftime('%H:%M') if m.created_at else '' }}</div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          {% set p = movements_page or 1 %}
+          {% set tp = movements_total_pages or 1 %}
+          {% if p > 1 %}
+            <a class="btn btn-secondary" href="?page={{ p - 1 }}">
+              <span>←</span>
+              Anterior
+            </a>
+          {% endif %}
+          <div class="pagination-info">Página {{ p }} de {{ tp }}</div>
+          {% if p < tp %}
+            <a class="btn btn-secondary" href="?page={{ p + 1 }}">
+              Siguiente
+              <span>→</span>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}
+
+  <script>
+    // Navegación entre tabs
+    function mostrarTab(tabName) {
+      // Ocultar todos los tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.style.display = 'none';
+      });
+      
+      // Mostrar tab seleccionado
+      document.getElementById(`tab-${tabName}`).style.display = 'block';
+      
+      // Actualizar botones activos
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+    }
+
+    // Función para enviar recordatorios
+    async function enviarRecordatorios() {
+      if(!confirm('¿Enviar recordatorios de trial a todos los usuarios elegibles?')) return;
+      
+      const status = document.getElementById('remind-status');
+      status.style.display = 'block';
+      status.className = 'status-message';
+      status.textContent = '⏳ Enviando recordatorios...';
+      
+      try {
+        const resp = await fetch('/web/admin/remind-trials', {method: 'POST'});
+        const data = await resp.json();
+        
+        if(data.ok) {
+          status.className = 'status-message status-success';
+          status.innerHTML = `✅ <strong>Recordatorios enviados exitosamente</strong><br>
+                            📧 Enviados: ${data.result.sent} | Candidatos: ${data.result.candidates}`;
+        } else {
+          throw new Error(data.error || 'Error desconocido');
+        }
+      } catch(error) {
+        status.className = 'status-message status-error';
+        status.textContent = `❌ Error al enviar recordatorios: ${error.message}`;
+      }
+      
+      // Ocultar después de 8 segundos
+      setTimeout(() => {
+        status.style.display = 'none';
+      }, 8000);
+    }
+
+    // Funciones de gestión
+    function extenderTrial(userId) {
+      const dias = prompt('¿Cuántos días adicionales?', '7');
+      if(dias && !isNaN(dias)) {
+        alert(`Trial extendido ${dias} días para usuario ${userId}`);
+        // Aquí iría la llamada a la API
+      }
+    }
+
+    function suspenderUsuario(userId) {
+      if(confirm('¿Estás seguro de suspender este usuario?')) {
+        alert(`Usuario ${userId} suspendido`);
+        // Aquí iría la llamada a la API
+      }
+    }
+
+    function filtrarUsuarios() {
+      // Implementar filtrado local o servidor
+      console.log('Aplicando filtros...');
+    }
+
+    function exportarFuentes() {
+      alert('Exportando fuentes...');
+    }
+
+    function exportarNoticias() {
+      alert('Exportando noticias...');
+    }
+
+    function exportarMovimientos() {
+      alert('Exportando movimientos...');
+    }
+
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', function() {
+      // Aquí puedes agregar inicializaciones adicionales
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 style="margin-top:0;">📰 Noticias recientes</h2>
+
+<style>
+  /* Grid fijo de 4 columnas para lista de noticias (responsive) */
+  .news-grid-4 { display:grid; gap:1rem; grid-template-columns: repeat(4, 1fr); margin-top:1rem; }
+  @media (max-width: 900px) { .news-grid-4 { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .news-grid-4 { grid-template-columns: repeat(1, 1fr); } }
+</style>
+
+<!-- Botón rápido para API & Exportaciones -->
+<div style="margin:.6rem 0; display:flex; gap:.5rem; align-items:center;">
+  
+</div>
+
+<!-- 🔍 Filtros y búsqueda -->
+<form method="get" action="/web/news"
+      style="margin:.8rem 0; display:flex; gap:.5rem; flex-wrap:wrap;">
+  <input type="text" name="q" value="{{ q or '' }}" placeholder="Buscar en título o contenido"
+         style="padding:.5rem;flex:1;min-width:220px;">
+  <input type="text" name="fuente" value="{{ fuente or '' }}" placeholder="Filtrar por dominio (ej: rpp.pe)"
+         style="padding:.5rem;flex:1;min-width:200px;">
+  <input type="number" min="1" max="200" name="limit" value="{{ limit or 50 }}" title="Resultados por página"
+         style="padding:.5rem; width:120px;">
+  <input type="hidden" name="offset" value="{{ offset or 0 }}">
+  <input class="btn btn-primary" type="submit" value="Buscar">
+  {% if q or fuente or categoria %}
+    <a class="btn" href="/web/news">Limpiar</a>
+  {% endif %}
+</form>
+
+<!-- 📊 Indicadores -->
+<div class="kpis" style="display:flex; gap:1rem; flex-wrap:wrap; margin:.8rem 0;">
+  <div class="kpi">Mostrando: <strong>{{ rows|length }}</strong> de <strong>{{ total }}</strong> noticias</div>
+  {% if categorias %}
+  <div class="kpi">Categorías disponibles: <strong>{{ categorias|length }}</strong></div>
+  {% endif %}
+  {% if categoria %}
+  <div class="kpi">Filtro activo: <strong>{{ categoria }}</strong></div>
+  {% endif %}
+</div>
+
+<!-- 🗂️ BOTONES DE CATEGORÍAS - SOLO MOSTRAR CATEGORÍAS PERMITIDAS -->
+{% set allowed = ['Política','Deportes','Salud','Economía','Música','Tecnología','Entretenimiento','Videojuegos','Tendencias'] %}
+{% if categorias and categorias|length > 0 %}
+<div class="categories" style="margin:1rem 0; padding:1rem; background:#f8f9fa; border-radius:8px; border:1px solid #e9ecef;">
+  <strong style="display:block; margin-bottom:0.5rem;">Categorías:</strong>
+  {% if total_categorias and total_categorias > categorias|length %}
+    <small style="margin-left:.6rem; color:#6c757d; font-weight:normal;">&nbsp;|&nbsp;
+      <a href="/web/categories" style="text-decoration:underline;">Ver todas ({{ total_categorias }})</a>
+    </small>
+  {% endif %}
+  <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+    <!-- Botón "Todas" -->
+    <a href="/web/news?{% if q %}q={{ q }}&{% endif %}{% if fuente %}fuente={{ fuente }}&{% endif %}limit={{ limit }}"
+       class="btn {% if not categoria %}btn-primary{% else %}btn-secondary{% endif %}" 
+       style="{% if not categoria %}background:#007bff; color:white;{% endif %}">
+      🏠 Todas
+    </a>
+    
+    <!-- Botones de cada categoría -->
+    {% for cat in categorias %}
+      {% if cat in allowed %}
+      <a href="/web/news?{% if q %}q={{ q }}&{% endif %}{% if fuente %}fuente={{ fuente }}&{% endif %}categoria={{ cat }}&limit={{ limit }}"
+         class="btn {% if categoria == cat %}btn-primary{% else %}btn-secondary{% endif %}"
+         style="{% if categoria == cat %}background:#007bff; color:white;{% endif %}">
+        {{ cat }}
+      </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+<div style="margin:1rem 0; padding:1rem; background:#fff3cd; border:1px solid #ffeaa7; border-radius:8px;">
+  ℹ️ No hay categorías detectadas aún. Las categorías se generan automáticamente al hacer scraping.
+</div>
+{% endif %}
+
+<!-- 📰 Cuadrícula de noticias (4 columnas) -->
+<div class="news-grid-4">
+  {% for n in rows %}
+  <div class="card"
+       style="display:flex; flex-direction:column; justify-content:space-between; border:1px solid #ddd; border-radius:.5rem; padding:.8rem; background:#fff; transition:box-shadow .2s;">
+    {% set img_src = None %}
+    {% if n.imagen_path and 'data/images/' in n.imagen_path %}
+      {% set img_src = '/images/' + n.imagen_path.split('data/images/')[-1] %}
+    {% elif n.imagen_path and n.imagen_path.startswith('http') %}
+      {% set img_src = n.imagen_path %}
+    {% endif %}
+
+    {% if img_src %}
+      <img class="thumb" src="{{ img_src }}" alt="imagen de la noticia"
+           loading="lazy" style="width:100%; height:160px; object-fit:cover; border-radius:.4rem;">
+    {% endif %}
+
+    <div style="flex:1; display:flex; flex-direction:column; justify-content:space-between; padding-top:.6rem;">
+      <div>
+        <h4 style="margin:0 0 .4rem 0; font-size:1rem; line-height:1.3;">
+          {{ n.titulo[:80] }}{% if n.titulo and n.titulo|length > 80 %}…{% endif %}
+        </h4>
+
+        <div class="muted" style="font-size:.85rem; margin-top:.2rem;">
+          {{ n.fuente }} ·
+          {% if n.fecha_publicacion %}
+            {{ n.fecha_publicacion.strftime('%Y-%m-%d %H:%M') }}
+          {% elif n.created_at %}
+            {{ n.created_at.strftime('%Y-%m-%d %H:%M') }}
+          {% endif %}
+        </div>
+
+        {% if n.categoria %}
+        <div style="margin:.3rem 0;">
+          <span class="badge" style="background:#e2e8f0; color:#475569; padding:.2rem .5rem; border-radius:1rem; font-size:.75rem;">
+            {{ n.categoria }}
+          </span>
+        </div>
+        {% endif %}
+
+        <p style="margin-top:.4rem; font-size:.9rem; white-space: pre-line; color:#555;">
+          {{ n.contenido[:120] }}{% if n.contenido and n.contenido|length > 120 %}…{% endif %}
+        </p>
+      </div>
+
+      <div style="margin-top:.6rem;">
+        <a class="btn btn-primary" href="/web/news/{{ n.id }}" style="width:100%; text-align:center;">
+          📖 Ver detalle
+        </a>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <p style="text-align:center; grid-column:1/-1; padding:2rem; color:#666;">
+    No hay noticias scrapeadas aún.
+    <br>
+    <a href="/web/sources" class="btn" style="margin-top:.5rem; display:inline-block;">
+      🌎 Ir a fuentes para hacer scraping
+    </a>
+  </p>
+  {% endfor %}
+</div>
+
+<!-- 🔄 Paginación -->
+{% if rows and rows|length == limit %}
+<div style="text-align:center; margin-top:2rem;">
+  <a href="/web/news?offset={{ offset + limit }}&limit={{ limit }}{% if q %}&q={{ q }}{% endif %}{% if fuente %}&fuente={{ fuente }}{% endif %}{% if categoria %}&categoria={{ categoria }}{% endif %}"
+     class="btn btn-primary">
+    📥 Cargar más noticias
+  </a>
+</div>
+{% endif %}
+
+<p style="margin-top:1rem; text-align:center;">
+  <a href="/">🏠 Inicio</a> · 
+  <a href="/web/sources">🌎 Fuentes</a> · 
+  <a href="/api/export/csv">📊 Exportar CSV</a>
+</p>
+<script>
+  // Toggle simple API links popover
+  (function(){
+    const toggle = document.getElementById('apiToggle');
+    const panel = document.getElementById('apiLinks');
+    if (!toggle || !panel) return;
+    toggle.addEventListener('click', function(e){
+      e.preventDefault();
+      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    });
+    document.addEventListener('click', function(e){
+      if (!panel.contains(e.target) && e.target !== toggle) {
+        panel.style.display = 'none';
+      }
+    });
+  })();
+</script>
+{% endblock %}

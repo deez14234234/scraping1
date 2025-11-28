@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexNews - Iniciar Sesión</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.8));
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .hero-content {
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        .features {
+            display: grid;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.6);
+            border-radius: 10px;
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+        }
+
+        .form-section {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-subtitle {
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+        }
+
+        .demo-section {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .demo-title {
+            font-weight: 600;
+            color: #0369a1;
+            margin-bottom: 1rem;
+        }
+
+        .demo-btn {
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .demo-btn:hover {
+            background: #0284c7;
+        }
+
+        .auth-links {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .auth-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .guest-link {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.8rem 1.5rem;
+            background: #10b981;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .guest-link:hover {
+            background: #059669;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero-section {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Sección Hero -->
+        <div class="hero-section">
+            <div class="hero-content">
+                <div class="logo">📊</div>
+                <h1 class="hero-title">NexNews</h1>
+                <p class="hero-subtitle">Sistema de Monitoreo de Noticias Inteligente</p>
+                
+                <div class="features">
+                    <div class="feature">
+                        <span class="feature-icon">📰</span>
+                        <span>Noticias en tiempo real</span>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">📱</span>
+                        <span>Redes sociales integradas</span>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">📊</span>
+                        <span>Análisis avanzado</span>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">💾</span>
+                        <span>Exportación múltiple</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección Formulario -->
+        <div class="form-section">
+            <h2 class="form-title">Iniciar Sesión</h2>
+            <p class="form-subtitle">Accede a tu cuenta para comenzar</p>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">📧 Correo Electrónico</label>
+                    <input type="email" id="email" placeholder="tu@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">🔒 Contraseña</label>
+                    <input type="password" id="password" placeholder="Tu contraseña" required>
+                </div>
+
+                <button type="submit" class="btn">🚀 Iniciar Sesión</button>
+            </form>
+
+            <div class="demo-section">
+                <div class="demo-title">¿Primera vez? Usa el acceso demo</div>
+                <button class="demo-btn" onclick="fillDemoCredentials()">
+                    🎯 Acceso Demo Rápido
+                </button>
+            </div>
+
+            <div class="auth-links">
+                <p>¿No tienes cuenta? 
+                    <a href="/web/registro" class="auth-link">Regístrate gratis</a>
+                </p>
+                
+                <!-- ✅ CORREGIDO: Botón para modo invitado -->
+                <a href="javascript:void(0)" onclick="loginAsGuest()" class="guest-link">
+                    🎯 Continuar como invitado
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = this.querySelector('.btn');
+            
+            btn.textContent = '🔄 Iniciando sesión...';
+            btn.disabled = true;
+
+            try {
+                // ✅ LOGIN NORMAL: Usar FormData para formulario web
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('password', password);
+
+                const response = await fetch('/web/login', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.redirected) {
+                    // ✅ Redirigir a donde el servidor indique
+                    window.location.href = response.url;
+                } else if (response.ok) {
+                    // ✅ Si no redirige, ir al dashboard
+                    window.location.href = '/dashboard';
+                } else {
+                    alert('Error: Credenciales incorrectas');
+                    btn.textContent = '🚀 Iniciar Sesión';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión');
+                btn.textContent = '🚀 Iniciar Sesión';
+                btn.disabled = false;
+            }
+        });
+
+        // ✅ FUNCIÓN: Modo invitado
+        function loginAsGuest() {
+            const guestBtn = document.querySelector('.guest-link');
+            guestBtn.innerHTML = '🔄 Iniciando como invitado...';
+            guestBtn.style.opacity = '0.7';
+            
+            // Establecer sesión de invitado
+            fetch('/web/guest-login', {
+                method: 'POST'
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    window.location.href = '/dashboard';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                window.location.href = '/dashboard'; // Intentar igual
+                guestBtn.innerHTML = '🎯 Continuar como invitado';
+                guestBtn.style.opacity = '1';
+            });
+        }
+
+        function fillDemoCredentials() {
+            document.getElementById('email').value = 'admin@nexnews.com';
+            document.getElementById('password').value = 'admin123';
+        }
+
+        // Auto-fill en desarrollo
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            setTimeout(fillDemoCredentials, 500);
+        }
+
+        // ✅ ELIMINADO: Verificación de token JWT
+    </script>
+</body>
+</html>

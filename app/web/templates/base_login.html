@@ -1,0 +1,430 @@
+{% extends "base_login.html" %}
+
+{% block title %}NexNews - Iniciar Sesión{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <!-- Sección Hero (izquierda) -->
+    <div class="login-hero">
+        <div class="hero-content">
+            <div class="hero-brand">
+                <div class="brand-logo">📊</div>
+                <h1 class="brand-title">NexNews</h1>
+                <p class="brand-tagline">Inteligencia en Tiempo Real</p>
+            </div>
+
+            <div class="hero-features">
+                <div class="feature-item">
+                    <span class="feature-icon">🚀</span>
+                    <div class="feature-text">
+                        <strong>Monitoreo en Tiempo Real</strong>
+                        <span>Sigue noticias al instante</span>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <span class="feature-icon">📱</span>
+                    <div class="feature-text">
+                        <strong>Redes Sociales</strong>
+                        <span>Twitter, Facebook & más</span>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <span class="feature-icon">📊</span>
+                    <div class="feature-text">
+                        <strong>Analytics Avanzado</strong>
+                        <span>Métricas detalladas</span>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <span class="feature-icon">💾</span>
+                    <div class="feature-text">
+                        <strong>Exportación Multi-formato</strong>
+                        <span>CSV, JSON, Excel</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-number">+2.5K</div>
+                    <div class="stat-label">Noticias/día</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">+50</div>
+                    <div class="stat-label">Fuentes</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Monitoreo</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección Formulario (derecha) -->
+    <div class="login-form-section">
+        <div class="form-container">
+            <div class="form-header">
+                <h2>¡Bienvenido de Nuevo!</h2>
+                <p>Ingresa a tu cuenta para continuar</p>
+            </div>
+
+            <form class="auth-form" id="loginForm">
+                <div class="form-group">
+                    <label for="email" class="form-label">
+                        <span class="label-icon">📧</span>
+                        Correo Electrónico
+                    </label>
+                    <input type="email" id="email" name="email" required 
+                           placeholder="tu@email.com" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">
+                        <span class="label-icon">🔒</span>
+                        Contraseña
+                    </label>
+                    <input type="password" id="password" name="password" required 
+                           placeholder="••••••••" class="form-input">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-large">
+                    <span class="btn-icon">🚀</span>
+                    Iniciar Sesión
+                </button>
+            </form>
+
+            <div class="demo-section">
+                <div class="demo-header">
+                    <span class="demo-icon">🎯</span>
+                    <strong>Acceso Rápido Demo</strong>
+                </div>
+                <div class="demo-credentials">
+                    <div class="credential">
+                        <span>📧</span>
+                        <code>demo@nexnews.com</code>
+                    </div>
+                    <div class="credential">
+                        <span>🔑</span>
+                        <code>demo123</code>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-outline btn-large" onclick="fillDemoCredentials()">
+                    🎯 Usar Credenciales Demo
+                </button>
+            </div>
+
+            <div class="auth-links">
+                <p>
+                    ¿Primera vez aquí? 
+                    <a href="/web/registro" class="auth-link">Crear cuenta gratis</a>
+                </p>
+                <p class="skip-link">
+                    <a href="/dashboard">🎯 Continuar como invitado</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ====== LAYOUT PRINCIPAL ====== */
+.login-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+}
+
+/* ====== SECCIÓN HERO ====== */
+.login-hero {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.hero-content {
+    max-width: 480px;
+    width: 100%;
+}
+
+.hero-brand {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.brand-logo {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.brand-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.brand-tagline {
+    font-size: 1.2rem;
+    color: #64748b;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* ====== FEATURES ====== */
+.hero-features {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 3rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255,255,255,0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.8);
+    backdrop-filter: blur(10px);
+}
+
+.feature-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.feature-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.feature-text strong {
+    color: #1e293b;
+    font-size: 1rem;
+}
+
+.feature-text span {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+/* ====== STATS ====== */
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    text-align: center;
+}
+
+.stat {
+    padding: 1rem;
+    background: rgba(255,255,255,0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.8);
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #3b82f6;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* ====== SECCIÓN FORMULARIO ====== */
+.login-form-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.form-container {
+    background: white;
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 400px;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form-header h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.form-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 1rem;
+}
+
+.auth-form {
+    margin-bottom: 2rem;
+}
+
+.label-icon {
+    margin-right: 0.5rem;
+}
+
+/* ====== DEMO SECTION ====== */
+.demo-section {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.demo-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+.demo-credentials {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.credential {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.credential code {
+    background: #e2e8f0;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-family: inherit;
+}
+
+/* ====== LINKS ====== */
+.auth-links {
+    text-align: center;
+}
+
+.auth-links p {
+    margin: 0.5rem 0;
+    color: #64748b;
+}
+
+.auth-link {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
+.skip-link {
+    font-size: 0.9rem;
+}
+
+.skip-link a {
+    color: #94a3b8;
+    text-decoration: none;
+}
+
+.skip-link a:hover {
+    color: #64748b;
+    text-decoration: underline;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+    .login-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .login-hero {
+        display: none;
+    }
+    
+    .login-form-section {
+        padding: 1rem;
+    }
+    
+    .form-container {
+        padding: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-container {
+        padding: 1.5rem;
+    }
+    
+    .hero-stats {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('loginForm');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitBtn = form.querySelector('.btn');
+        const originalText = submitBtn.innerHTML;
+        
+        // Mostrar loading
+        submitBtn.innerHTML = '🔄 Iniciando sesión...';
+        submitBtn.disabled = true;
+        
+        // Simular autenticación
+        setTimeout(() => {
+            window.location.href = '/dashboard';
+        }, 1500);
+    });
+    
+    // Auto-fill en desarrollo
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        setTimeout(fillDemoCredentials, 500);
+    }
+});
+
+function fillDemoCredentials() {
+    document.getElementById('email').value = 'demo@nexnews.com';
+    document.getElementById('password').value = 'demo123';
+}
+</script>
+{% endblock %}

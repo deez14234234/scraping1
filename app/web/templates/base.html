@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>NexNews - Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <style>
+    /* ====== RESET COMPLETO PARA 100% PANTALLA ====== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ====== HEADER SIMPLIFICADO ====== */
+    header {
+      background: #1e293b;
+      padding: 1rem 0;
+      border-bottom: 1px solid #334155;
+      width: 100%;
+      margin: 0;
+      flex-shrink: 0;
+    }
+
+    .nav-container {
+      width: 100%;
+      margin: 0;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      color: #f1f5f9;
+      font-weight: 700;
+      font-size: 1.5rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    .brand .logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg,#3b82f6,#06b6d4);
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .auth-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      background: #374151;
+      color: #f1f5f9;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      border: 1px solid #475569;
+      font-size: 0.9rem;
+    }
+
+    .auth-btn:hover {
+      background: #4b5563;
+      transform: translateY(-1px);
+    }
+
+    .auth-btn-primary {
+      background: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .auth-btn-primary:hover {
+      background: #2563eb;
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .user-name {
+      color: #f1f5f9;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .user-plan {
+      color: #94a3b8;
+      font-size: 0.8rem;
+    }
+
+    .logout-btn {
+      background: #dc2626;
+      border-color: #dc2626;
+    }
+
+    .logout-btn:hover {
+      background: #b91c1c;
+    }
+
+    /* ====== LAYOUT PRINCIPAL 100% ====== */
+    .app-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: calc(100vh - 140px);
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ====== SIDEBAR MEJORADO ====== */
+    aside.sidebar {
+      background: linear-gradient(180deg, #0f172a, #0b1220);
+      color: #e6eef8;
+      padding: 2rem 1.5rem;
+      min-height: calc(100vh - 140px);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      border-right: 1px solid rgba(255,255,255,0.03);
+      overflow-y: auto;
+    }
+
+    .sidebar-section {
+      margin-bottom: 2rem;
+    }
+
+    .sidebar-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .sidebar .section-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-bottom: 1rem;
+      text-align: left;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .sidebar a.slink {
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
+      padding: 0.9rem 1rem;
+      color: #cbd5e1;
+      text-decoration: none;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      text-align: left;
+      font-weight: 500;
+    }
+
+    .sidebar a.slink:hover {
+      background: rgba(255,255,255,0.08);
+      transform: translateX(5px);
+      color: #ffffff;
+    }
+
+    .sidebar a.slink.active {
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      color: #fff;
+      box-shadow: 0 8px 25px rgba(37,99,235,0.25);
+      transform: translateX(5px);
+    }
+
+    .sidebar-icon {
+      font-size: 1.2rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* ====== CONTENIDO PRINCIPAL 100% ====== */
+    main.container {
+      padding: 2rem;
+      width: 100%;
+      min-height: calc(100vh - 140px);
+      overflow-y: auto;
+      background: #f8fafc;
+    }
+
+    /* ====== DASHBOARD ESPECÍFICO ====== */
+    .dashboard-header {
+      margin-bottom: 2rem;
+      width: 100%;
+      text-align: left;
+    }
+
+    .dashboard-header h1 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: #1a365d;
+      font-size: 2.5rem;
+      font-weight: 800;
+    }
+
+    .dashboard-header p {
+      font-size: 1.2rem;
+      color: #4a5568;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+      width: 100%;
+    }
+
+    .metric-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+    }
+
+    .metric-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex: 1;
+    }
+
+    .metric-text {
+      flex: 1;
+      text-align: left;
+    }
+
+    .metric-icon {
+      font-size: 3rem;
+      opacity: 0.9;
+    }
+
+    .metric-card h3 {
+      margin: 0;
+      font-size: 1rem;
+      opacity: 0.9;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    .metric-value {
+      margin: 0.8rem 0 0 0;
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1;
+      text-align: left;
+    }
+
+    .metric-description {
+      margin: 0.8rem 0 0 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+      text-align: left;
+    }
+
+    /* ====== QUICK ACTIONS ====== */
+    .quick-actions {
+      margin-bottom: 3rem;
+      width: 100%;
+      text-align: left;
+    }
+
+    .quick-actions h2 {
+      color: #1e293b;
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s ease;
+      height: 100%;
+      text-align: center;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.5rem;
+      background: #3b82f6;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      justify-content: center;
+    }
+
+    .btn:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      text-decoration: none;
+    }
+
+    /* ====== FOOTER ====== */
+    footer {
+      background: #1e293b;
+      color: #94a3b8;
+      text-align: center;
+      padding: 1.5rem 0;
+      border-top: 1px solid #334155;
+      width: 100%;
+      margin: 0;
+      flex-shrink: 0;
+    }
+
+    .footer-container {
+      width: 100%;
+      margin: 0;
+      padding: 0 2rem;
+    }
+
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 1200px) {
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .app-layout {
+        grid-template-columns: 1fr;
+      }
+      
+      aside.sidebar {
+        min-height: auto;
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        order: 2;
+        padding: 1.5rem;
+      }
+      
+      main.container {
+        order: 1;
+        padding: 1.5rem;
+      }
+      
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+      
+      .header-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .auth-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+      
+      .dashboard-header h1 {
+        font-size: 2rem;
+      }
+      
+      .metric-card {
+        padding: 1.5rem;
+      }
+      
+      .metric-value {
+        font-size: 2.2rem;
+      }
+
+      .user-menu {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-end;
+      }
+
+      .user-info {
+        align-items: flex-end;
+      }
+    }
+
+    @media (max-width: 480px) {
+      main.container {
+        padding: 1rem;
+      }
+      
+      .metric-card {
+        padding: 1.2rem;
+        min-height: 150px;
+      }
+      
+      .metric-value {
+        font-size: 2rem;
+      }
+      
+      .btn {
+        padding: 0.7rem 1.2rem;
+      }
+      
+      .brand {
+        font-size: 1.3rem;
+      }
+      
+      .brand .logo {
+        width: 35px;
+        height: 35px;
+      }
+      
+      .nav-container {
+        padding: 0 1rem;
+      }
+    }
+  </style>
+
+  <link rel="stylesheet" href="/static/style.css">
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+  <header>
+    <div class="nav-container">
+      <a href="/dashboard" class="brand">
+        <span class="logo" aria-hidden="true"></span>
+        NexNews
+      </a>
+      <div class="header-actions" id="headerAuth">
+        <!-- Se llenará dinámicamente con JavaScript -->
+      </div>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <!-- Navegación Principal -->
+      <div class="sidebar-section">
+        <div class="section-title">Navegación</div>
+        <div class="sidebar-nav">
+          <a href="/dashboard" class="slink {% if request.url.path == '/dashboard' %}active{% endif %}">
+            <span class="sidebar-icon">📊</span>
+            <span>Dashboard</span>
+          </a>
+          <a href="/web/news" class="slink {% if '/web/news' in request.url.path %}active{% endif %}">
+            <span class="sidebar-icon">📰</span>
+            <span>Noticias</span>
+          </a>
+          <a href="/sources/" class="slink {% if '/sources' in request.url.path %}active{% endif %}">
+            <span class="sidebar-icon">🌐</span>
+            <span>Fuentes</span>
+          </a>
+          <a href="/api/social/dashboard" class="slink {% if '/social' in request.url.path %}active{% endif %}">
+            <span class="sidebar-icon">📱</span>
+            <span>Redes Sociales</span>
+          </a>
+          <a href="/web/export" class="slink {% if '/web/export' in request.url.path %}active{% endif %}">
+            <span class="sidebar-icon">📊</span>
+            <span>Exportar Datos</span>
+          </a>
+          <a href="/web/plans" class="slink {% if '/web/plans' in request.url.path %}active{% endif %}">
+            <span class="sidebar-icon">💎</span>
+            <span>Planes & Precios</span>
+          </a>
+          <a href="/web/metrics" class="slink {% if '/web/metrics' in request.url.path %}active{% endif %}">
+            <span class="sidebar-icon">📈</span>
+            <span>Métricas</span>
+          </a>
+          {# Mostrar enlace admin sólo si la sesión indica admin (fallback a current_user) #}
+          {% set sess_email = None %}
+          {% if request and request.session %}
+            {% set sess_email = request.session.get('user_email') %}
+          {% endif %}
+          {% if (sess_email and sess_email == 'admin@nexnews.com') or (current_user and current_user.email == 'admin@nexnews.com') %}
+          <a href="/web/admin/movements" class="slink {% if '/web/admin' in request.url.path %}active{% endif %}">
+            <span class="sidebar-icon">🛠️</span>
+            <span>Admin - Movimientos</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Información de Usuario -->
+      <div style="flex: 1"></div>
+      <div class="sidebar-section">
+        <div class="section-title">Sistema</div>
+        <div id="user-info" style="font-size: 0.85rem; color: rgba(255,255,255,0.7); padding: 0.5rem 1rem;">
+          <!-- Se llenará dinámicamente con JavaScript -->
+        </div>
+        <div id="auth-buttons" class="sidebar-nav">
+          <!-- Se llenará dinámicamente con JavaScript -->
+        </div>
+      </div>
+    </aside>
+
+    <main class="container">
+    {% if msg %}
+      <div style="background:#dcfce7; color:#166534; padding:1rem; border-radius:8px; margin-bottom:1.5rem; border:1px solid #bbf7d0;">
+        {{ msg }}
+      </div>
+    {% endif %}
+    
+    {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <footer>
+    <div class="footer-container">
+      <div class="muted">NexNews • Sistema de Monitoreo de Noticias • Todos los derechos reservados</div>
+    </div>
+  </footer>
+
+  <script>
+// Sistema de autenticación SIMPLIFICADO para sesiones
+document.addEventListener('DOMContentLoaded', function() {
+    initializeUI();
+});
+
+function initializeUI() {
+    updateUIForCurrentUser();
+}
+
+function updateUIForCurrentUser() {
+    const headerAuth = document.getElementById('headerAuth');
+    const userInfo = document.getElementById('user-info');
+    const authButtons = document.getElementById('auth-buttons');
+
+    // Verificar si hay usuario en el template (sesión activa)
+    const userDataElement = document.getElementById('user-data');
+    let user = null;
+    
+    if (userDataElement) {
+        try {
+            user = JSON.parse(userDataElement.textContent);
+        } catch (e) {
+            console.log('No hay datos de usuario en el template');
+        }
+    }
+
+    if (user) {
+        // ✅ USUARIO AUTENTICADO (sesión activa)
+        if (headerAuth) {
+            const iniciales = user.nombre ? user.nombre.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+            headerAuth.innerHTML = `
+                <div class="user-menu">
+                    <div class="user-info">
+                        <div class="user-name">${user.nombre || user.email}</div>
+                        <div class="user-plan" style="color: ${user.plan === 'premium' ? '#f59e0b' : '#6b7280'}">
+                            ${user.plan === 'premium' ? '💎' : '🆓'} ${user.plan === 'premium' ? 'Premium' : 'Gratis'}
+                        </div>
+                    </div>
+                    <div class="user-avatar">${iniciales}</div>
+                    <a href="/web/logout" class="auth-btn logout-btn">
+                        🚪 Cerrar Sesión
+                    </a>
+                </div>
+            `;
+        }
+
+        if (userInfo) {
+            userInfo.innerHTML = `
+                <div>👤 ${user.nombre || 'Usuario'}</div>
+                <div>📧 ${user.email}</div>
+                <div style="color: ${user.plan === 'premium' ? '#f59e0b' : '#6b7280'}">
+                    ${user.plan === 'premium' ? '💎' : '🆓'} Plan: ${user.plan === 'premium' ? 'Premium' : 'Gratis'}
+                </div>
+                <div style="color: #10b981">🟢 Estado: Activo</div>
+                <div style="margin-top: 0.5rem; font-size: 0.75rem; color: rgba(255,255,255,0.5);">
+                    NexNews v1.0
+                </div>
+            `;
+        }
+
+        if (authButtons) {
+            authButtons.innerHTML = `
+                <a href="/web/logout" class="slink" style="font-size: 0.8rem;">
+                    <span class="sidebar-icon">🚪</span>
+                    <span>Cerrar Sesión</span>
+                </a>
+            `;
+        }
+    } else {
+        // ❌ USUARIO NO AUTENTICADO
+        if (headerAuth) {
+            headerAuth.innerHTML = `
+                <a href="/web/plans" class="auth-btn auth-btn-primary">
+                    💎 Actualizar a Premium
+                </a>
+                <a href="/web/login" class="auth-btn">
+                    🔐 Iniciar Sesión
+                </a>
+            `;
+        }
+
+        if (userInfo) {
+            userInfo.innerHTML = `
+                <div>👤 Usuario: Invitado</div>
+                <div>🆓 Plan: Gratis</div>
+                <div>🟡 Estado: No autenticado</div>
+                <div style="margin-top: 0.5rem; font-size: 0.75rem; color: rgba(255,255,255,0.5);">
+                    NexNews v1.0
+                </div>
+            `;
+        }
+
+        if (authButtons) {
+            authButtons.innerHTML = `
+                <a href="/web/login" class="slink" style="font-size: 0.8rem;">
+                    <span class="sidebar-icon">🔐</span>
+                    <span>Iniciar Sesión</span>
+                </a>
+                <a href="/web/registro" class="slink" style="font-size: 0.8rem;">
+                    <span class="sidebar-icon">🚀</span>
+                    <span>Registrarse</span>
+                </a>
+            `;
+        }
+    }
+}
+
+// Función global para logout
+function logout() {
+    // Limpiar cualquier dato local si existe
+    localStorage.removeItem('token');
+    // La redirección la maneja el enlace HTML
+}
+
+// Manejar navegación de forma simple
+document.addEventListener('click', function(e) {
+    // Permitir que todos los enlaces funcionen normalmente
+    // El middleware del servidor se encargará de la autenticación
+});
+
+// Elemento oculto para pasar datos del usuario desde el template
+</script>
+
+<!-- Elemento oculto para pasar datos del usuario desde Jinja2 -->
+<script id="user-data" type="application/json">
+{% if current_user %}
+{
+    "email": "{{ current_user.email }}",
+    "nombre": "{{ current_user.nombre }}",
+    "plan": "{{ current_user.plan }}"
+}
+{% endif %}
+</script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

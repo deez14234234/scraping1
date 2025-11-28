@@ -1,0 +1,1011 @@
+<!-- app/web/templates/sources.html - VERSIÓN COMPLETA CORREGIDA -->
+{% extends "base.html" %}
+{% block content %}
+<div class="sources-container">
+    <!-- Modal de resultados de scraping -->
+    <div id="scrape-results-modal" class="modal" aria-hidden="true" style="display:none;">
+        <div class="modal-backdrop"></div>
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h3 id="modal-title">Resultados</h3>
+                <button id="modal-close" class="btn btn-sm btn-danger">✖</button>
+            </div>
+            <div class="modal-body">
+                <ul id="modal-articles-list" class="articles-list"></ul>
+            </div>
+        </div>
+    </div>
+    <!-- Header Mejorado -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1>📡 Gestión de Fuentes</h1>
+            <p class="subtitle">Administra y configura las fuentes de noticias para scraping</p>
+        </div>
+        <div class="header-stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ total if total is defined else (fuentes|length if fuentes is defined else 0) }}</div>
+                <div class="stat-label">Total Fuentes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ (fuentes | selectattr('habilitada') | list | length) if fuentes is defined else '0' }}</div>
+                <div class="stat-label">Habilitadas</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes Flash Mejorados -->
+    {% if request.query_params.get('err') %}
+    <div class="alert alert-error">
+        <div class="alert-icon">❌</div>
+        <div class="alert-content">
+            <strong>Error:</strong> {{ request.query_params.get('err') }}
+        </div>
+    </div>
+    {% elif request.query_params.get('msg') %}
+    <div class="alert alert-success">
+        <div class="alert-icon">✅</div>
+        <div class="alert-content">
+            <strong>Éxito:</strong> {{ request.query_params.get('msg') }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Panel de Acciones Principales CORREGIDO -->
+    <div class="action-panel">
+        <div class="action-group">
+            <form id="scrape-all-form" action="/sources/scrape-all" method="post" onsubmit="return confirm('¿Scrapear TODAS las fuentes habilitadas ahora?');">
+                <button class="btn btn-primary btn-large" type="submit">
+                    <span class="btn-icon">🚀</span>
+                    Scrapear Todas las Fuentes
+                </button>
+            </form>
+            
+           
+        </div>
+        
+        <div class="action-group search-container">
+            <form method="get" action="/sources" class="search-form">
+                <div class="search-input-group">
+                    <input type="text" name="q" value="{{ q or '' }}" placeholder="Buscar por nombre o URL..." class="search-input">
+                    <button type="submit" class="search-btn">
+                        <span class="search-icon">🔍</span>
+                    </button>
+                </div>
+                <input type="number" min="1" max="200" name="limit" value="{{ limit or 50 }}" title="Resultados por página" class="limit-input">
+                {% if q %}
+                <a class="btn btn-secondary" href="/sources">Limpiar</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Formulario Agregar Fuente Mejorado CORREGIDO -->
+    <div class="card add-source-card">
+        <div class="card-header">
+            <h3>➕ Agregar Nueva Fuente</h3>
+        </div>
+        <div class="card-body">
+            <form action="/sources/add" method="post" class="source-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="url_listado" class="form-label">URL de Listado/Portada</label>
+                        <input type="url" id="url_listado" name="url_listado" 
+                               placeholder="https://ejemplo.com/noticias" required class="form-input">
+                        <div class="form-hint">Ingresa la URL principal donde se listan las noticias</div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nombre" class="form-label">Nombre Personalizado (Opcional)</label>
+                        <input type="text" id="nombre" name="nombre" 
+                               placeholder="Nombre del medio o sección" class="form-input">
+                        <div class="form-hint">Si se deja vacío, se generará automáticamente</div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <span class="btn-icon">➕</span>
+                        Agregar Fuente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de Fuentes Mejorada CORREGIDA -->
+    <div class="card sources-table-card">
+        <div class="card-header">
+            <h3>🗂️ Fuentes Registradas</h3>
+            <div class="card-actions">
+                <span class="badge">{{ fuentes|length if fuentes else 0 }} fuentes</span>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if fuentes and fuentes|length %}
+            <div class="table-container">
+                <table class="sources-table">
+                    <thead>
+                        <tr>
+                            <th class="col-id">ID</th>
+                            <th class="col-name">Nombre</th>
+                            <th class="col-url">URL</th>
+                            <th class="col-status">Estado</th>
+                            <th class="col-last-scraped">Último Scrapeo</th>
+                            <th class="col-actions">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for f in fuentes %}
+                        <tr data-source-id="{{ f.id }}" class="source-row {% if not f.habilitada %}source-disabled{% endif %}">
+                            <td class="source-id">{{ f.id }}</td>
+                            <td class="source-name">
+                                <div class="source-name-content">
+                                    <strong>{{ f.nombre or "Sin nombre" }}</strong>
+                                </div>
+                            </td>
+                            <td class="source-url">
+                                <a href="{{ f.url_listado }}" target="_blank" rel="noopener" class="url-link">
+                                    {{ f.url_listado }}
+                                </a>
+                            </td>
+                            <td class="source-status">
+                                {% if f.habilitada %}
+                                <span class="status-badge status-active">
+                                    <span class="status-dot"></span>
+                                    Habilitada
+                                </span>
+                                {% else %}
+                                <span class="status-badge status-inactive">
+                                    <span class="status-dot"></span>
+                                    Deshabilitada
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="source-last-scraped">
+                                {% if f.last_scraped_at %}
+                                <div class="last-scraped">
+                                    <div class="date">{{ f.last_scraped_at.strftime('%d/%m/%Y') if f.last_scraped_at else '-' }}</div>
+                                    <div class="time">{{ f.last_scraped_at.strftime('%H:%M') if f.last_scraped_at else '' }}</div>
+                                </div>
+                                {% else %}
+                                <span class="no-data">Nunca</span>
+                                {% endif %}
+                            </td>
+                            <td class="source-actions">
+                                <div class="action-buttons">
+                                    <!-- ✅ CORREGIDO: Rutas actualizadas -->
+                                    <form class="ajax-scrape-form" action="/sources/{{ f.id }}/scrape" method="post" data-source-id="{{ f.id }}" onsubmit="return confirm('¿Scrapear esta fuente ahora?');">
+                                        <button type="submit" class="btn btn-sm btn-primary" title="Scrapear">
+                                            🔎
+                                        </button>
+                                    </form>
+
+                                    {% if f.habilitada %}
+                                    <form action="/sources/{{ f.id }}/disable" method="post" 
+                                          onsubmit="return confirm('¿Deshabilitar esta fuente?');">
+                                        <button type="submit" class="btn btn-sm btn-warning" title="Pausar">
+                                            ⏸️
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <form action="/sources/{{ f.id }}/enable" method="post" 
+                                          onsubmit="return confirm('¿Habilitar esta fuente?');">
+                                        <button type="submit" class="btn btn-sm btn-success" title="Activar">
+                                            ▶️
+                                        </button>
+                                    </form>
+                                    {% endif %}
+
+                                    <form action="/sources/{{ f.id }}/delete" method="post" 
+                                          onsubmit="return confirm('¿Eliminar permanentemente esta fuente?');">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                            🗑️
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <h4>No hay fuentes registradas</h4>
+                <p>Agrega tu primera fuente para comenzar con el scraping de noticias.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Paginación Mejorada CORREGIDA -->
+    {% if limit is defined and offset is defined %}
+    {% set prev_offset = (offset or 0) - (limit or 50) %}
+    {% set next_offset = (offset or 0) + (limit or 50) %}
+    <div class="pagination">
+        <div class="pagination-content">
+            {% if (offset or 0) > 0 %}
+            <a class="btn btn-secondary" 
+               href="/sources?limit={{ limit or 50 }}&offset={{ prev_offset if prev_offset>0 else 0 }}{% if q %}&q={{ q|urlencode }}{% endif %}">
+                ← Anterior
+            </a>
+            {% endif %}
+            
+            <div class="pagination-info">
+                Página {{ ((offset or 0) // (limit or 50)) + 1 }}
+            </div>
+            
+            {% if has_next %}
+            <a class="btn btn-secondary" 
+               href="/sources?limit={{ limit or 50 }}&offset={{ next_offset }}{% if q %}&q={{ q|urlencode }}{% endif %}">
+                Siguiente →
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+/* Estilos específicos para la página de fuentes */
+.sources-container {
+    width: 100%;
+    max-width: none;
+}
+
+/* Header Mejorado */
+.page-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    align-items: start;
+    margin-bottom: 2rem;
+}
+
+.header-content h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.subtitle {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #64748b;
+}
+
+.header-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    min-width: 120px;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #3b82f6;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 0.5rem;
+}
+
+/* Alertas Mejoradas */
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+}
+
+.alert-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+.alert-icon {
+    font-size: 1.2rem;
+}
+
+.alert-content {
+    flex: 1;
+}
+
+/* Panel de Acciones */
+.action-panel {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+    align-items: start;
+    margin-bottom: 2rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.search-form {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.search-input-group {
+    position: relative;
+    flex: 1;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.search-btn {
+    position: absolute;
+    left: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: #6b7280;
+}
+
+.limit-input {
+    width: 80px;
+    padding: 0.8rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+}
+
+/* Formulario Agregar Fuente */
+.add-source-card {
+    margin-bottom: 2rem;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #1e293b;
+}
+
+.card-actions .badge {
+    background: #3b82f6;
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.source-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #374151;
+}
+
+.form-input {
+    padding: 0.8rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-hint {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Botones Mejorados */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    background: #3b82f6;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    justify-content: center;
+    font-size: 0.95rem;
+}
+
+.btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: #3b82f6;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+}
+
+.btn-secondary {
+    background: #6b7280;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+}
+
+.btn-success {
+    background: #10b981;
+}
+
+.btn-success:hover {
+    background: #059669;
+}
+
+.btn-warning {
+    background: #f59e0b;
+}
+
+.btn-warning:hover {
+    background: #d97706;
+}
+
+.btn-danger {
+    background: #ef4444;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+.btn-sm {
+    padding: 0.5rem;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+}
+
+.btn-icon {
+    font-size: 1.1rem;
+}
+
+/* Tabla Mejorada */
+.sources-table-card {
+    margin-bottom: 2rem;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.sources-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sources-table th {
+    background: #f8fafc;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.sources-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.source-row:hover {
+    background: #f8fafc;
+}
+
+.source-disabled {
+    opacity: 0.7;
+    background: #f9fafb;
+}
+
+/* Columnas de la tabla */
+.col-id { width: 80px; }
+.col-name { width: 200px; }
+.col-url { min-width: 300px; }
+.col-status { width: 120px; }
+.col-last-scraped { width: 140px; }
+.col-actions { width: 180px; }
+
+.source-name strong {
+    color: #1e293b;
+}
+
+.url-link {
+    color: #3b82f6;
+    text-decoration: none;
+    font-family: monospace;
+    font-size: 0.9rem;
+    word-break: break-all;
+}
+
+.url-link:hover {
+    text-decoration: underline;
+}
+
+/* Estados */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.status-inactive {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fed7aa;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-active .status-dot {
+    background: #10b981;
+}
+
+.status-inactive .status-dot {
+    background: #f59e0b;
+}
+
+.last-scraped {
+    font-size: 0.9rem;
+}
+
+.last-scraped .date {
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.last-scraped .time {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.no-data {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* Botones de Acción */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Estado Vacío */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #6b7280;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state h4 {
+    margin: 0 0 0.5rem 0;
+    color: #374151;
+}
+
+.empty-state p {
+    margin: 0;
+}
+
+/* Modal resultados */
+.modal { position: fixed; inset: 0; display:flex; align-items:center; justify-content:center; z-index:1500; }
+.modal-backdrop { position:absolute; inset:0; background:rgba(15,23,42,0.6); }
+.modal-panel { position:relative; background:white; border-radius:12px; padding:1rem; width:min(900px,95%); max-height:80vh; overflow:auto; box-shadow:0 20px 50px rgba(2,6,23,0.3); }
+.modal-header { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:0.5rem; }
+.modal-body { padding-top:0.5rem; }
+.articles-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.5rem; }
+.articles-list li { padding:0.6rem; border-radius:8px; background:#f8fafc; }
+.articles-list a { color:#0ea5a4; text-decoration:none; font-weight:600; }
+.articles-list .meta { font-size:0.85rem; color:#6b7280; }
+
+/* Paginación */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.pagination-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pagination-info {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .page-header {
+        grid-template-columns: 1fr;
+    }
+    
+    .header-stats {
+        justify-content: flex-start;
+    }
+    
+    .action-panel {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .sources-table {
+        font-size: 0.9rem;
+    }
+    
+    .sources-table th,
+    .sources-table td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .search-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .limit-input {
+        width: 100%;
+    }
+    
+    .col-actions {
+        width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .header-stats {
+        flex-direction: column;
+    }
+    
+    .stat-card {
+        min-width: auto;
+    }
+    
+    .action-panel {
+        padding: 1rem;
+    }
+    
+    .btn-large {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+</style>
+
+<script>
+// Animación breve de fila (exito/error)
+function flashRow(row, success=true) {
+    if (!row) return;
+    const orig = row.style.boxShadow;
+    row.style.transition = 'background 0.4s ease, transform 0.15s ease';
+    row.style.transform = 'scale(1.005)';
+    row.style.background = success ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)';
+    setTimeout(() => {
+        row.style.transform = '';
+        row.style.background = '';
+        row.style.boxShadow = orig;
+    }, 900);
+}
+
+// Función para mostrar notificaciones mejorada
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        max-width: 400px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    `;
+    
+    notification.innerHTML = `
+        <div class="alert-icon">${type === 'success' ? '✅' : '❌'}</div>
+        <div class="alert-content">${message}</div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => notification.remove(), 300);
+    }, 5000);
+}
+
+// Mejora la experiencia del formulario
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.source-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const urlInput = document.getElementById('url_listado');
+            if (urlInput.value && !urlInput.value.startsWith('http')) {
+                urlInput.value = 'https://' + urlInput.value;
+            }
+        });
+    }
+    
+    // Mostrar mensajes de éxito/error automáticamente
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('msg')) {
+        showNotification(urlParams.get('msg'), 'success');
+    }
+    if (urlParams.get('err')) {
+        showNotification(urlParams.get('err'), 'error');
+    }
+});
+
+// Modal helpers
+function showResultsModal(articles, title) {
+    const modal = document.getElementById('scrape-results-modal');
+    const list = document.getElementById('modal-articles-list');
+    const t = document.getElementById('modal-title');
+    if (!modal || !list || !t) return;
+    t.textContent = title || 'Resultados del scraping';
+    list.innerHTML = '';
+    articles.forEach(a => {
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = a.url || '#';
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.textContent = a.titulo || (a.url || 'Sin título');
+        li.appendChild(link);
+        if (a.id) {
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            meta.textContent = `ID: ${a.id}`;
+            li.appendChild(meta);
+        }
+        list.appendChild(li);
+    });
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden', 'false');
+
+    const closeBtn = document.getElementById('modal-close');
+    const backdrop = modal.querySelector('.modal-backdrop');
+    function hide() {
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+    }
+    if (closeBtn) {
+        closeBtn.onclick = hide;
+    }
+    if (backdrop) {
+        backdrop.onclick = hide;
+    }
+}
+
+
+// Función para scrapear con feedback visual
+function scrapeWithFeedback(button) {
+    const originalText = button.innerHTML;
+    button.innerHTML = '⏳ Procesando...';
+    button.disabled = true;
+    
+    setTimeout(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    }, 3000);
+}
+
+// AJAX scraping: interceptar formularios y llamar endpoints JSON
+document.addEventListener('DOMContentLoaded', function() {
+    // Individual scrape forms
+    document.querySelectorAll('.ajax-scrape-form').forEach(form => {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!confirm('¿Scrapear esta fuente ahora?')) return;
+            const sourceId = form.dataset.sourceId;
+            const button = form.querySelector('button');
+            const original = button.innerHTML;
+            button.innerHTML = '⏳';
+            button.disabled = true;
+
+            try {
+                const resp = await fetch(`/sources/${sourceId}/scrape-json`, { method: 'POST' });
+                const j = await resp.json();
+                if (j.ok) {
+                    const saved = j.saved || 0;
+                    showNotification((j.msg ? j.msg + ` — ${saved} noticias` : 'Scrape completado'), 'success');
+                    // actualizar última fecha en la fila
+                    const row = document.querySelector(`tr[data-source-id="${sourceId}"]`);
+                    if (row) {
+                        const cell = row.querySelector('.source-last-scraped');
+                        if (cell) {
+                            const now = new Date();
+                            const d = now.toLocaleDateString();
+                            const t = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                            cell.innerHTML = `<div class="last-scraped"><div class="date">${d}</div><div class="time">${t}</div></div>`;
+                        }
+                                    // Flash visual en la fila
+                                    flashRow(row, true);
+                    }
+                } else {
+                    const saved = j.saved || 0;
+                    showNotification((j.msg ? j.msg + ` — ${saved} noticias` : 'Error al scrapear'), 'error');
+                    const row = document.querySelector(`tr[data-source-id="${sourceId}"]`);
+                    flashRow(row, false);
+                    // Si hay artículos retornados, mostrarlos en modal
+                    if (Array.isArray(j.articles) && j.articles.length) {
+                        showResultsModal(j.articles, `Nuevas noticias (${j.saved || j.articles.length})`);
+                    }
+                }
+            } catch (err) {
+                showNotification('Error de red al iniciar scraping', 'error');
+            } finally {
+                button.innerHTML = original;
+                button.disabled = false;
+            }
+        });
+    });
+
+    // Scrapear todas (AJAX)
+    const allForm = document.getElementById('scrape-all-form');
+    if (allForm) {
+        allForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!confirm('¿Scrapear TODAS las fuentes habilitadas ahora?')) return;
+            const btn = allForm.querySelector('button');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '⏳ Procesando...';
+            btn.disabled = true;
+            try {
+                const resp = await fetch('/sources/scrape-all-json', { method: 'POST' });
+                const j = await resp.json();
+                if (j.ok) {
+                    const total = j.total_saved || 0;
+                    showNotification((j.msg ? j.msg + ` — ${total} noticias` : 'Scraping completado'), 'success');
+                    // mostrar modal con artículos si vienen en el resultado
+                    try {
+                        let flat = [];
+                        if (Array.isArray(j.results)) {
+                            j.results.forEach(r => {
+                                if (Array.isArray(r.articles) && r.articles.length) flat = flat.concat(r.articles);
+                            });
+                        }
+                        if (flat.length) {
+                            showResultsModal(flat, `Scrape masivo — ${total} noticias`);
+                        }
+                    } catch (e) {
+                        // ignore
+                    }
+                    // opcional: recargar la página para ver resultados
+                    setTimeout(() => location.reload(), 900);
+                } else {
+                    showNotification(j.msg || 'Error al scrapear', 'error');
+                }
+            } catch (err) {
+                showNotification('Error de red al iniciar scraping masivo', 'error');
+            } finally {
+                btn.innerHTML = orig;
+                btn.disabled = false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

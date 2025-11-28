@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .metrics-container {
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    margin: 20px auto;
+    max-width: 800px;
+    text-align: center;
+  }
+
+  h1 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .description {
+    color: #555;
+    margin-bottom: 30px;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 40px;
+  }
+
+  .metric-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+  }
+
+  .metric-card:hover {
+    transform: scale(1.03);
+  }
+
+  .metric-title {
+    font-weight: bold;
+    color: #34495e;
+    margin-bottom: 8px;
+  }
+
+  .metric-value {
+    font-size: 1.3em;
+    color: #2c3e50;
+  }
+
+  .confusion-matrix {
+    margin-top: 20px;
+  }
+
+  .confusion-matrix img {
+    width: 80%;
+    max-width: 500px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-top: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn-refresh {
+    background: #0078d7;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 15px;
+    margin-bottom: 20px;
+  }
+
+  .btn-refresh:hover {
+    background: #005fa3;
+  }
+</style>
+
+<div class="metrics-container">
+  <h1>Métricas de Desempeño 📊</h1>
+  <p class="description">
+    Resultados del modelo de clasificación de noticias según el último entrenamiento.
+  </p>
+
+  <form action="/api/metrics/train" method="post">
+    <button class="btn-refresh">🔁 Reentrenar modelo</button>
+  </form>
+
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-title">Precisión</div>
+      <div class="metric-value">{{ resultados.precision | round(3) }}</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-title">Recall</div>
+      <div class="metric-value">{{ resultados.recall | round(3) }}</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-title">F1-score</div>
+      <div class="metric-value">{{ resultados.f1 | round(3) }}</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-title">AUC-ROC</div>
+      {% if resultados.auc %}
+        <div class="metric-value">{{ resultados.auc | round(3) }}</div>
+      {% else %}
+        <div class="metric-value">N/A</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="confusion-matrix">
+    <h3>Matriz de Confusión</h3>
+    <img src="{{ resultados.image }}" alt="Matriz de Confusión">
+  </div>
+</div>
+{% endblock %}

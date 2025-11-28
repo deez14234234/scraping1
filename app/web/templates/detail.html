@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+
+<a class="btn" href="/web/news">← Volver</a>
+
+<article class="card"
+         style="margin-top:1rem; padding:1rem; border:1px solid #ddd; border-radius:.6rem; 
+                box-shadow:0 1px 3px rgba(0,0,0,0.05); background:#fff;">
+  <header>
+    <h2 style="margin:.2rem 0;">{{ n.titulo or "Sin título" }}</h2>
+
+    <div class="muted" style="font-size:.95rem; margin-bottom:.4rem;">
+      <span>{{ n.fuente or "Fuente desconocida" }}</span> ·
+      <span>
+        Publicada: 
+        {% if n.fecha_publicacion %}
+          {{ n.fecha_publicacion.strftime('%Y-%m-%d %H:%M') }}
+        {% else %}
+          ?
+        {% endif %}
+      </span> ·
+      <span>
+        Ingresó: 
+        {% if n.created_at %}
+          {{ n.created_at.strftime('%Y-%m-%d %H:%M') }}
+        {% else %}
+          ?
+        {% endif %}
+      </span>
+    </div>
+
+    {% if n.url %}
+    <div style="margin-top:.4rem;">
+      <a class="btn btn-primary" href="{{ n.url }}" target="_blank" rel="noopener noreferrer">
+        🌐 Ver artículo original
+      </a>
+    </div>
+    {% endif %}
+  </header>
+
+  <!-- Imagen principal -->
+  {% set img_src = None %}
+  {% if n.imagen_path %}
+    {% if 'data/images/' in n.imagen_path %}
+      {% set img_src = '/images/' + n.imagen_path.split('data/images/')[-1] %}
+    {% elif n.imagen_path.startswith('http') %}
+      {% set img_src = n.imagen_path %}
+    {% endif %}
+  {% endif %}
+
+  {% if img_src %}
+    <div style="margin:1rem 0; text-align:center;">
+      <img src="{{ img_src }}" alt="imagen de la noticia"
+           style="max-width:100%; border:1px solid #e2e8f0; border-radius:.4rem; object-fit:cover;" 
+           loading="lazy">
+    </div>
+  {% endif %}
+
+  <!-- Contenido de la noticia -->
+  <section style="white-space: pre-line; line-height:1.6; font-size:1rem; margin-top:.5rem;">
+    {% if n.contenido %}
+      {{ n.contenido }}
+    {% else %}
+      <em class="muted">Sin contenido disponible.</em>
+    {% endif %}
+  </section>
+
+  <!-- Cambios detectados -->
+{% if cambios and cambios|length %}
+  <hr style="margin:1.5rem 0;">
+  <h3 style="margin-bottom:.5rem;">🕓 Cambios detectados</h3>
+  <ul style="padding-left:1.2rem; margin:0;">
+    {% for c in cambios %}
+      <li class="muted" style="font-size:.95rem; margin-bottom:.2rem;">
+        {% if c.detected_at %}
+          {{ c.detected_at.strftime('%Y-%m-%d %H:%M') }}
+        {% endif %}
+        — <strong>{{ c.campo or "Campo" }}</strong>:
+        “{{ c.valor_anterior|default('-', true) }}” → “{{ c.valor_nuevo|default('-', true) }}”
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+</article>
+
+<!-- Enlaces de navegación -->
+<p style="margin-top:1.5rem; text-align:center;">
+  <a href="/">🏠 Inicio</a> · 
+  <a href="/web/news">📰 Noticias</a> · 
+  <a href="/web/sources">🌎 Fuentes</a>
+</p>
+
+{% endblock %}

@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="export-container">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1>📊 Exportar Datos</h1>
+            <p class="subtitle">Descarga tus datos en diferentes formatos para análisis externos</p>
+        </div>
+        <div class="header-stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ total_news or 0 }}</div>
+                <div class="stat-label">Noticias</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ total_social or 0 }}</div>
+                <div class="stat-label">Posts Sociales</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formatos de Exportación -->
+    <div class="export-formats">
+        <div class="format-card">
+            <div class="format-icon">📄</div>
+            <div class="format-content">
+                <h3>CSV (Excel)</h3>
+                <p>Formato ideal para hojas de cálculo. Compatible con Excel, Google Sheets y otros programas de análisis.</p>
+                <ul class="format-features">
+                    <li>✅ Separado por comas</li>
+                    <li>✅ Compatible con Excel</li>
+                    <li>✅ Fácil de procesar</li>
+                </ul>
+                <button type="button" data-format="csv" class="btn btn-primary btn-large export-btn">
+                    📥 Descargar CSV
+                </button>
+            </div>
+        </div>
+
+        <div class="format-card">
+            <div class="format-icon">🔷</div>
+            <div class="format-content">
+                <h3>JSON</h3>
+                <p>Formato estructurado ideal para desarrolladores y aplicaciones. Mantiene la estructura completa de datos.</p>
+                <ul class="format-features">
+                    <li>✅ Estructura completa</li>
+                    <li>✅ Ideal para APIs</li>
+                    <li>✅ Fácil de parsear</li>
+                </ul>
+                <button type="button" data-format="json" class="btn btn-primary btn-large export-btn">
+                    📥 Descargar JSON
+                </button>
+            </div>
+        </div>
+
+        <div class="format-card">
+            <div class="format-icon">💾</div>
+            <div class="format-content">
+                <h3>Excel (.xlsx)</h3>
+                <p>Archivo Excel nativo con formato aplicado. Listo para usar con gráficos y análisis integrados.</p>
+                <ul class="format-features">
+                    <li>✅ Formato Excel nativo</li>
+                    <li>✅ Múltiples hojas</li>
+                    <li>✅ Gráficos integrados</li>
+                </ul>
+                <button type="button" data-format="xlsx" class="btn btn-primary btn-large export-btn">
+                    📥 Descargar Excel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros Avanzados -->
+    <div class="card filters-card">
+        <div class="card-header">
+            <h3>🔧 Filtros de Exportación</h3>
+            <p>Personaliza los datos que deseas exportar</p>
+        </div>
+        <div class="card-body">
+            <form class="filters-form">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">Tipo de Contenido</label>
+                            <select id="filter-content" class="filter-select">
+                                <option value="all">Todos los datos</option>
+                                <option value="news">Solo noticias</option>
+                                <option value="social">Solo redes sociales</option>
+                            </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Rango de Fechas</label>
+                        <div class="date-inputs">
+                            <input type="date" id="filter-start" class="filter-input" placeholder="Desde">
+                            <input type="date" id="filter-end" class="filter-input" placeholder="Hasta">
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Fuente Específica</label>
+                        <input id="filter-source" class="filter-input" placeholder="Nombre o dominio de fuente (opcional)">
+                    </div>
+                </div>
+                
+                <div class="filter-actions">
+                    <button type="button" class="btn btn-secondary">
+                        🔄 Aplicar Filtros
+                    </button>
+                    <button type="reset" class="btn btn-outline">
+                        🗑️ Limpiar Filtros
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Estadísticas de Datos -->
+    <div class="data-stats">
+        <div class="stat-item">
+            <div class="stat-number">{{ total_news or 0 }}</div>
+            <div class="stat-label">Noticias Totales</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ total_social or 0 }}</div>
+            <div class="stat-label">Posts Sociales</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ total_sources or 0 }}</div>
+            <div class="stat-label">Fuentes Activas</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ last_export or "Nunca" }}</div>
+            <div class="stat-label">Última Exportación</div>
+        </div>
+    </div>
+</div>
+
+<style>
+.export-container {
+    width: 100%;
+    max-width: none;
+}
+
+.page-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    align-items: start;
+    margin-bottom: 3rem;
+}
+
+.header-content h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.subtitle {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #64748b;
+}
+
+.header-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    min-width: 120px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #3b82f6;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 0.5rem;
+}
+
+/* Formatos de Exportación */
+.export-formats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.format-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.format-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border-color: #3b82f6;
+}
+
+.format-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.format-content {
+    flex: 1;
+}
+
+.format-content h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    color: #1e293b;
+    text-align: center;
+}
+
+.format-content p {
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.format-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem 0;
+}
+
+.format-features li {
+    padding: 0.3rem 0;
+    color: #059669;
+    font-size: 0.9rem;
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    width: 100%;
+}
+
+/* Filtros */
+.filters-card {
+    margin-bottom: 2rem;
+}
+
+.card-header {
+    margin-bottom: 1.5rem;
+}
+
+.card-header h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    color: #1e293b;
+}
+
+.card-header p {
+    margin: 0;
+    color: #64748b;
+}
+
+.filters-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #374151;
+}
+
+.filter-select, .filter-input {
+    padding: 0.8rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background: white;
+}
+
+.date-inputs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid #d1d5db;
+    color: #374151;
+}
+
+.btn-outline:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+/* Estadísticas */
+.data-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.stat-item {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        grid-template-columns: 1fr;
+    }
+    
+    .header-stats {
+        justify-content: center;
+    }
+    
+    .export-formats {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-actions {
+        justify-content: stretch;
+    }
+    
+    .filter-actions .btn {
+        flex: 1;
+    }
+    
+    .data-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .data-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .header-content h1 {
+        font-size: 2rem;
+    }
+    
+    .format-card {
+        padding: 1.5rem;
+    }
+}
+</style>
+    <script>
+        // Export handlers: build URL with filters and open
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.export-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const format = btn.dataset.format; // csv | json | xlsx
+                    const contentEl = document.getElementById('filter-content');
+                    const content = contentEl ? contentEl.value : 'all';
+                    const startEl = document.getElementById('filter-start');
+                    const endEl = document.getElementById('filter-end');
+                    const sourceEl = document.getElementById('filter-source');
+                    const start = startEl ? startEl.value : '';
+                    const end = endEl ? endEl.value : '';
+                    const source = sourceEl ? sourceEl.value : '';
+                    const params = new URLSearchParams();
+                    if (content) params.set('content', content);
+                    if (start) params.set('start_date', start);
+                    if (end) params.set('end_date', end);
+                    if (source) params.set('source', source);
+                    const url = `/api/export/${format}` + (params.toString() ? `?${params.toString()}` : '');
+                    // Open in new tab to download
+                    window.open(url, '_blank');
+                });
+            });
+        });
+    </script>
+{% endblock %}

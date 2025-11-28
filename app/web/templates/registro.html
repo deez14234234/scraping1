@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>🚀 Crear Cuenta</h1>
+            <p>Únete a NexNews y comienza a monitorear noticias</p>
+        </div>
+
+        <form class="auth-form" action="/api/auth/registrar" method="post">
+            <div class="form-group">
+                <label for="nombre">👤 Nombre Completo</label>
+                <input type="text" id="nombre" name="nombre" required 
+                       placeholder="Tu nombre completo" class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label for="email">📧 Email</label>
+                <input type="email" id="email" name="email" required 
+                       placeholder="tu@email.com" class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label for="password">🔒 Contraseña</label>
+                <input type="password" id="password" name="password" required 
+                       placeholder="Mínimo 6 caracteres" class="form-input" minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">✅ Confirmar Contraseña</label>
+                <input type="password" id="confirm_password" name="confirm_password" required 
+                       placeholder="Repite tu contraseña" class="form-input">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-large">
+                🎉 Crear Cuenta
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>¿Ya tienes cuenta? <a href="/web/login" class="auth-link">Inicia sesión aquí</a></p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-error">
+            {{ error }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+/* Los mismos estilos que login.html */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 2rem;
+}
+
+.auth-card {
+    background: white;
+    border-radius: 16px;
+    padding: 3rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.auth-header p {
+    margin: 0;
+    color: #64748b;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #374151;
+}
+
+.form-input {
+    padding: 0.8rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.auth-link {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
+.alert-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    text-align: center;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.auth-form');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Validar contraseñas
+        if (password.value !== confirmPassword.value) {
+            showError('Las contraseñas no coinciden');
+            return;
+        }
+        
+        if (password.value.length < 6) {
+            showError('La contraseña debe tener al menos 6 caracteres');
+            return;
+        }
+        
+        const formData = new FormData(form);
+        const data = {
+            nombre: formData.get('nombre'),
+            email: formData.get('email'),
+            password: formData.get('password')
+        };
+        
+        try {
+            const response = await fetch('/api/auth/registrar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                // Guardar token en localStorage
+                localStorage.setItem('access_token', result.access_token);
+                // Redirigir al dashboard
+                window.location.href = '/';
+            } else {
+                const error = await response.json();
+                showError(error.detail || 'Error al crear la cuenta');
+            }
+        } catch (error) {
+            showError('Error de conexión');
+        }
+    });
+    
+    function showError(message) {
+        let errorDiv = document.querySelector('.alert-error');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-error';
+            form.appendChild(errorDiv);
+        }
+        errorDiv.textContent = message;
+    }
+});
+</script>
+{% endblock %}

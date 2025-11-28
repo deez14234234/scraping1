@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planes y Precios - NexNews</title>
+    <style>
+        /* Reset y estilos base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .plans-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .plans-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .plans-header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        .plans-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Grid de Planes */
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .plan-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .plan-card.popular {
+            border: 3px solid #3b82f6;
+            transform: scale(1.05);
+        }
+
+        .plan-card.popular:hover {
+            transform: scale(1.05) translateY(-10px);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .plan-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .plan-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .plan-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-description {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .plan-price {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 15px;
+        }
+
+        .price-amount {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #3b82f6;
+            line-height: 1;
+        }
+
+        .price-period {
+            color: #64748b;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .price-savings {
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            display: inline-block;
+        }
+
+        .plan-actions {
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #374151;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+
+        /* Sección de Beneficios */
+        .benefits-section {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .benefits-category {
+            margin-bottom: 3rem;
+        }
+
+        .benefits-category:last-child {
+            margin-bottom: 0;
+        }
+
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .benefit-header {
+            font-weight: 700;
+            color: #475569;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .benefit-free, .benefit-premium {
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .benefit-free {
+            background: #f1f5f9;
+            color: #64748b;
+            border: 2px solid #e2e8f0;
+        }
+
+        .benefit-premium {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            color: white;
+            border: 2px solid #3b82f6;
+        }
+
+        .benefit-item {
+            display: contents;
+        }
+
+        /* Destacar filas exclusivas de Premium */
+        .benefit-item.exclusive .benefit-feature {
+            background: linear-gradient(90deg, #fff7ed, #fff4e6);
+            border-left: 4px solid #f59e0b;
+        }
+
+        .benefit-feature {
+            padding: 1rem;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .feature-icon {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .unlimited-badge {
+            background: #10b981;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-left: 0.5rem;
+        }
+
+        .exclusive-badge {
+            background: #f59e0b;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-left: 0.5rem;
+        }
+
+        .comparison-toggle {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .toggle-btn {
+            background: #f1f5f9;
+            border: 2px solid #e2e8f0;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 0.5rem;
+        }
+
+        .toggle-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .toggle-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .benefit-category-header {
+            grid-column: 1 / -1;
+            background: #1e293b;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .faq-section h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #1e293b;
+        }
+
+        .faq-grid {
+            display: grid;
+            gap: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .faq-question {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .faq-answer {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .plans-header h1 {
+                font-size: 2rem;
+            }
+
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .plan-card.popular {
+                transform: none;
+            }
+
+            .plan-card.popular:hover {
+                transform: translateY(-10px);
+            }
+
+            .benefits-section {
+                padding: 1.5rem;
+            }
+
+            .benefits-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .benefit-item {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+                margin-bottom: 1rem;
+                padding: 1rem;
+                background: #f8fafc;
+                border-radius: 10px;
+            }
+
+            .benefit-category-header {
+                grid-column: 1;
+            }
+
+            .toggle-btn {
+                padding: 0.8rem 1rem;
+                margin: 0.25rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="plans-container">
+        <!-- Header -->
+        <div class="plans-header">
+            <h1>💎 Elige Tu Plan</h1>
+            <p>Selecciona el plan que mejor se adapte a tus necesidades de monitoreo de noticias</p>
+        </div>
+
+        <!-- Planes -->
+        <div class="plans-grid">
+            <!-- Plan Gratis -->
+            <div class="plan-card">
+                <div class="plan-header">
+                    <div class="plan-icon">🆓</div>
+                    <h2 class="plan-name">Plan Gratis</h2>
+                    <p class="plan-description">Perfecto para probar la plataforma.</p>
+                </div>
+                <div class="plan-price">
+                    <div class="price-amount">S/ 0</div>
+                    <div class="price-period">para siempre</div>
+                </div>
+                <div class="plan-actions">
+                    <a href="/web/registro" class="btn btn-secondary">Comenzar Gratis</a>
+                </div>
+                <ul style="margin-top:1rem; color: #475569; list-style: none; padding-left: 0;">
+                    <li>• Hasta 3 fuentes de noticias</li>
+                    <li>• 1 red social para scrapeo</li>
+                    <li>• Actualización cada 12 horas</li>
+                    <li>• 300 noticias/mes</li>
+                    <li>• Dashboard básico</li>
+                    <li>• Exportación solo en CSV</li>
+                    <li>• Clasificación básica por categorías</li>
+                    <li>• Anuncios leves en el dashboard</li>
+                </ul>
+
+            <!-- Plan Premium -->
+            <div class="plan-card popular">
+                <div class="popular-badge">POPULAR</div>
+                <div class="plan-header">
+                    <div class="plan-icon">💎</div>
+                    <h2 class="plan-name">Plan Premium</h2>
+                    <p class="plan-description">Ideal para empresas y usuarios avanzados</p>
+                </div>
+                <div class="plan-price">
+                    <div class="price-amount">S/ 29.90</div>
+                    <div class="price-period">por mes</div>
+                </div>
+                <div class="plan-actions">
+                    <button id="try-premium" class="btn btn-primary">Probar Premium</button>
+                </div>
+                <ul style="margin-top:1rem; color: #475569; list-style: none; padding-left: 0;">
+                    <li>• Fuentes ilimitadas</li>
+                    <li>• Redes sociales ilimitadas</li>
+                    <li>• Actualización cada 1 hora (o manual frecuente)</li>
+                    <li>• Noticias ilimitadas</li>
+                    <li>• Dashboard profesional</li>
+                    <li>• Resúmenes con IA</li>
+                    <li>• Análisis de sentimiento</li>
+                    <li>• Exportación en CSV, Excel y JSON</li>
+                    <li>• Alertas por Email y WhatsApp</li>
+                    <li>• Filtros avanzados por país, idioma y tema</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Comparación Detallada de Beneficios -->
+        <div class="benefits-section">
+            <h2 style="text-align: center; margin-bottom: 2rem; font-size: 2rem; color: #1e293b;">
+                📊 Comparación Detallada de Beneficios
+            </h2>
+            
+            <div class="comparison-toggle">
+                <button class="toggle-btn active" onclick="mostrarVista('comparison')">Vista Comparativa</button>
+                <button class="toggle-btn" onclick="mostrarVista('categorized')">Por Categorías</button>
+            </div>
+            
+            <!-- Vista Comparativa -->
+            <div id="comparison-view">
+                <div class="benefits-grid">
+                    <div class="benefit-header">Característica</div>
+                    <div class="benefit-header">Plan Gratis</div>
+                    <div class="benefit-header">Plan Premium</div>
+                </div>
+                
+                <div id="benefits-comparison">
+                    <!-- Los beneficios se cargarán aquí con JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Vista por Categorías -->
+            <div id="categorized-view" style="display: none;">
+                <div id="benefits-categories">
+                    <!-- Las categorías se cargarán aquí con JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="faq-section">
+            <h2>❓ Preguntas Frecuentes</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <div class="faq-question">¿Puedo cambiar de plan en cualquier momento?</div>
+                    <div class="faq-answer">Sí, puedes actualizar o degradar tu plan en cualquier momento desde tu panel de control.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">¿El plan gratis incluye todas las funciones?</div>
+                    <div class="faq-answer">El plan gratis incluye funciones básicas suficientes para proyectos personales y testing.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">¿Hay compromiso de permanencia?</div>
+                    <div class="faq-answer">No, puedes cancelar tu suscripción en cualquier momento sin penalizaciones.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">¿Ofrecen descuentos para equipos?</div>
+                    <div class="faq-answer">Sí, ofrecemos descuentos especiales para equipos de más de 5 usuarios.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de beneficios actualizados según especificación del usuario
+        const beneficiosData = {
+            categorias: {
+                noticias: [
+                    {caracteristica: "Fuentes de noticias", valor_gratis: "Hasta 3", valor_premium: "Ilimitadas", ilimitado_premium: true, es_exclusivo: false},
+                    {caracteristica: "Redes sociales soportadas", valor_gratis: "1", valor_premium: "Ilimitadas", ilimitado_premium: true, es_exclusivo: false},
+                    {caracteristica: "Frecuencia de actualización", valor_gratis: "Cada 12 horas", valor_premium: "Cada 1 hora / Manual frecuente", ilimitado_premium: false, es_exclusivo: false},
+                    {caracteristica: "Límite mensual de noticias", valor_gratis: "300", valor_premium: "Ilimitadas", ilimitado_premium: true, es_exclusivo: false},
+                    {caracteristica: "Dashboard", valor_gratis: "Básico", valor_premium: "Profesional", ilimitado_premium: false, es_exclusivo: false},
+                    {caracteristica: "Clasificación por categorías", valor_gratis: "Básica", valor_premium: "Avanzada", ilimitado_premium: false, es_exclusivo: false},
+                    {caracteristica: "Anuncios en dashboard", valor_gratis: "Leves", valor_premium: "Sin anuncios", ilimitado_premium: false, es_exclusivo: false}
+                ],
+                herramientas: [
+                    {caracteristica: "Resúmenes con IA", valor_gratis: "❌", valor_premium: "✅", ilimitado_premium: false, es_exclusivo: true},
+                    {caracteristica: "Análisis de sentimiento", valor_gratis: "❌", valor_premium: "✅", ilimitado_premium: false, es_exclusivo: true},
+                    {caracteristica: "Exportación", valor_gratis: "CSV", valor_premium: "CSV, Excel, JSON", ilimitado_premium: false, es_exclusivo: false},
+                    {caracteristica: "Alertas", valor_gratis: "❌", valor_premium: "Email y WhatsApp", ilimitado_premium: false, es_exclusivo: true},
+                    {caracteristica: "Filtros avanzados", valor_gratis: "No", valor_premium: "País, idioma y tema", ilimitado_premium: false, es_exclusivo: true}
+                ]
+            }
+        };
+
+        // Cargar beneficios al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarBeneficios();
+        });
+        
+        function cargarBeneficios() {
+            // Usar datos locales por ahora
+            mostrarComparacion(beneficiosData.categorias);
+            mostrarCategorias(beneficiosData.categorias);
+        }
+        
+        function mostrarComparacion(categorias) {
+            const container = document.getElementById('benefits-comparison');
+            let html = '';
+            
+            for (const [categoria, beneficios] of Object.entries(categorias)) {
+                html += `<div class="benefit-category-header">
+                    ${obtenerIconoCategoria(categoria)} ${obtenerNombreCategoria(categoria)}
+                </div>`;
+                
+                beneficios.forEach(beneficio => {
+                    html += `
+                    <div class="benefit-item ${beneficio.es_exclusivo ? 'exclusive' : ''}">
+                        <div class="benefit-feature">
+                            <span class="feature-icon">${obtenerIconoCaracteristica(beneficio.caracteristica)}</span>
+                            ${beneficio.caracteristica}
+                            ${beneficio.es_exclusivo ? '<span class="exclusive-badge">EXCLUSIVO</span>' : ''}
+                        </div>
+                        <div class="benefit-free">
+                            ${beneficio.valor_gratis}
+                            ${beneficio.ilimitado_premium && beneficio.valor_gratis !== 'Ilimitadas' ? '' : ''}
+                        </div>
+                        <div class="benefit-premium">
+                            ${beneficio.valor_premium}
+                            ${beneficio.ilimitado_premium ? '<span class="unlimited-badge">ILIMITADO</span>' : ''}
+                        </div>
+                    </div>`;
+                });
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function mostrarCategorias(categorias) {
+            const container = document.getElementById('benefits-categories');
+            let html = '';
+            
+            for (const [categoria, beneficios] of Object.entries(categorias)) {
+                html += `
+                <div class="benefits-category">
+                    <h3 class="category-title">
+                        ${obtenerIconoCategoria(categoria)}
+                        ${obtenerNombreCategoria(categoria)}
+                    </h3>
+                    <div class="benefits-grid">
+                        <div class="benefit-header">Característica</div>
+                        <div class="benefit-header">Starter</div>
+                        <div class="benefit-header">Professional</div>
+                        
+                        ${beneficios.map(beneficio => `
+                            <div class="benefit-item ${beneficio.es_exclusivo ? 'exclusive' : ''}">
+                                <div class="benefit-feature">
+                                    <span class="feature-icon">${obtenerIconoCaracteristica(beneficio.caracteristica)}</span>
+                                    ${beneficio.caracteristica}
+                                    ${beneficio.es_exclusivo ? '<span class="exclusive-badge">EXCLUSIVO</span>' : ''}
+                                </div>
+                                <div class="benefit-free">
+                                    ${beneficio.valor_gratis}
+                                </div>
+                                <div class="benefit-premium">
+                                    ${beneficio.valor_premium}
+                                    ${beneficio.ilimitado_premium ? '<span class="unlimited-badge">ILIMITADO</span>' : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function mostrarVista(vista) {
+            document.getElementById('comparison-view').style.display = vista === 'comparison' ? 'block' : 'none';
+            document.getElementById('categorized-view').style.display = vista === 'categorized' ? 'block' : 'none';
+            
+            // Actualizar botones toggle
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        function obtenerIconoCategoria(categoria) {
+            const iconos = {
+                'noticias': '📰',
+                'redes_sociales': '📱',
+                'exportacion': '📊',
+                'almacenamiento': '💾',
+                'analisis': '📈',
+                'soporte': '⚡',
+                'herramientas': '🤖'
+            };
+            return iconos[categoria] || '📋';
+        }
+        
+        function obtenerNombreCategoria(categoria) {
+            const nombres = {
+                'noticias': 'Noticias y Fuentes',
+                'redes_sociales': 'Redes Sociales',
+                'exportacion': 'Exportación de Datos',
+                'almacenamiento': 'Almacenamiento',
+                'analisis': 'Análisis Avanzado',
+                'soporte': 'Soporte',
+                'herramientas': 'Herramientas'
+            };
+            return nombres[categoria] || categoria;
+        }
+        
+        function obtenerIconoCaracteristica(caracteristica) {
+            if (caracteristica.includes('noticia')) return '📰';
+            if (caracteristica.includes('fuente')) return '🌐';
+            if (caracteristica.includes('scraping')) return '⏰';
+            if (caracteristica.includes('redes')) return '📱';
+            if (caracteristica.includes('exportación')) return '📊';
+            if (caracteristica.includes('almacenamiento')) return '💾';
+            if (caracteristica.includes('análisis')) return '📈';
+            if (caracteristica.includes('alerta')) return '🔔';
+            if (caracteristica.includes('soporte')) return '⚡';
+            return '✅';
+        }
+    </script>
+</body>
+</html>
+
+<script>
+// Handler para el botón 'Probar Premium'
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('try-premium');
+    if (!btn) return;
+    btn.addEventListener('click', async function() {
+        try {
+            const resp = await fetch('/web/upgrade-plan', { method: 'POST', headers: { 'Accept': 'application/json' } });
+            const j = await resp.json();
+            if (j.ok) {
+                alert(j.msg || 'Plan actualizado a Premium');
+                // actualizar UI: redirigir al dashboard
+                window.location.href = '/dashboard';
+            } else if (j.redirect) {
+                // redirigir a registro si el servidor lo solicita
+                window.location.href = j.redirect;
+            } else {
+                alert(j.msg || 'No se pudo actualizar el plan');
+            }
+        } catch (err) {
+            alert('Error de red al intentar actualizar el plan');
+        }
+    });
+});
+</script>

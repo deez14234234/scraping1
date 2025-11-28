@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 style="margin-top:0;">📱 Posts de Redes Sociales</h2>
+
+<!-- Filtros -->
+<div class="card" style="margin: 1rem 0; padding: 1rem; background: #f8fafc;">
+    <form method="get" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        <div>
+            <label><strong>Plataforma:</strong></label>
+            <select name="platform" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #d1d5db;">
+                <option value="">Todas</option>
+                {% for p in platforms %}
+                <option value="{{ p }}" {% if current_platform == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div>
+            <label><strong>Fuente:</strong></label>
+            <select name="source" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #d1d5db;">
+                <option value="">Todas</option>
+                {% for s in sources %}
+                <option value="{{ s }}" {% if current_source == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div>
+            <label><strong>Límite:</strong></label>
+            <select name="limit" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #d1d5db;">
+                <option value="20" {% if limit == 20 %}selected{% endif %}>20</option>
+                <option value="50" {% if limit == 50 %}selected{% endif %}>50</option>
+                <option value="100" {% if limit == 100 %}selected{% endif %}>100</option>
+            </select>
+        </div>
+        
+        <div style="margin-left: auto;">
+            <button type="submit" class="btn" style="background: #3b82f6; color: white;">🔍 Filtrar</button>
+            <a href="/api/social/posts" class="btn" style="background: #6c757d; color: white;">🔄 Limpiar</a>
+        </div>
+    </form>
+</div>
+
+<!-- Estadísticas -->
+<div class="kpis" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1rem 0;">
+    <div class="card" style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div style="font-size: 1.5rem; font-weight: bold;">{{ total_count }}</div>
+        <div style="font-size: 0.9rem;">Total Posts</div>
+    </div>
+    <div class="card" style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+        <div style="font-size: 1.5rem; font-weight: bold;">{{ platforms|length }}</div>
+        <div style="font-size: 0.9rem;">Plataformas</div>
+    </div>
+    <div class="card" style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+        <div style="font-size: 1.5rem; font-weight: bold;">{{ sources|length }}</div>
+        <div style="font-size: 0.9rem;">Fuentes</div>
+    </div>
+    <div class="card" style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+        <div style="font-size: 1.5rem; font-weight: bold;">{{ posts|length }}</div>
+        <div style="font-size: 0.9rem;">Mostrando</div>
+    </div>
+</div>
+
+<!-- Lista de Posts -->
+<div class="posts-list">
+    {% if posts %}
+        {% for post in posts %}
+        <div class="card" style="margin: 1rem 0; padding: 1.5rem; border-left: 5px solid 
+            {% if post.platform == 'twitter' %}#1da1f2
+            {% elif post.platform == 'facebook' %}#1877f2
+            {% else %}#666{% endif %}; background: white;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                <div>
+                    <span class="badge" style="background: 
+                        {% if post.platform == 'twitter' %}#1da1f2
+                        {% elif post.platform == 'facebook' %}#1877f2
+                        {% else %}#666{% endif %}; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">
+                        {{ post.platform|upper }}
+                    </span>
+                    <span class="badge" style="background: #e2e8f0; color: #475569; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem;">
+                        {{ post.source }}
+                    </span>
+                    <span style="margin-left: 1rem; font-weight: 600; color: #333;">@{{ post.username }}</span>
+                </div>
+                <small style="color: #999;">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+            </div>
+            
+            <p style="margin: 0.8rem 0; line-height: 1.5; color: #333; font-size: 0.95rem;">{{ post.text }}</p>
+            
+            <div style="display: flex; gap: 1.5rem; font-size: 0.9rem; color: #666; margin: 1rem 0;">
+                {% if post.likes %}
+                <span>❤️ <strong>{{ post.likes }}</strong> likes</span>
+                {% endif %}
+                {% if post.retweets %}
+                <span>🔄 <strong>{{ post.retweets }}</strong> retweets</span>
+                {% endif %}
+                {% if post.shares %}
+                <span>📤 <strong>{{ post.shares }}</strong> shares</span>
+                {% endif %}
+                {% if post.comments %}
+                <span>💬 <strong>{{ post.comments }}</strong> comentarios</span>
+                {% endif %}
+            </div>
+            
+            {% if post.url %}
+            <div style="margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid #e5e7eb;">
+                <a href="{{ post.url }}" target="_blank" rel="noopener" style="color: #3b82f6; text-decoration: none; font-weight: 500;">
+                    🔗 Ver post original
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="card" style="text-align: center; padding: 3rem; background: #f9fafb;">
+        <h3 style="color: #999;">📭 No hay posts de redes sociales</h3>
+        <p style="color: #999; margin: 1rem 0;">No se han encontrado posts con los filtros seleccionados.</p>
+        <a href="/web/sources" class="btn" style="background: #3b82f6; color: white; display: inline-block; margin-top: 1rem;">
+            🚀 Ejecutar Scraping Ahora
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Navegación -->
+<div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; border-top: 1px solid #e2e8f0; padding-top: 1.5rem;">
+    <a href="/api/social/dashboard" class="btn" style="background: #667eea; color: white;">📊 Dashboard</a>
+    <a href="/web/sources" class="btn" style="background: #4caf50; color: white;">🚀 Ejecutar Scraping</a>
+    <a href="/web/news" class="btn" style="background: #17a2b8; color: white;">📰 Ver Noticias</a>
+    <a href="/" class="btn" style="background: #007bff; color: white;">🏠 Inicio</a>
+</div>
+
+<script>
+// Mensaje si no hay posts pero hay fuentes
+document.addEventListener('DOMContentLoaded', function() {
+  if ({{ total_count }} === 0 && {{ sources|length }} > 0) {
+    console.log('Hay fuentes pero no se han scrappeado posts aún');
+  }
+});
+</script>
+{% endblock %}

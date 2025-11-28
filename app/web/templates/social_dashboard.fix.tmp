@@ -1,0 +1,24 @@
+    document.addEventListener('DOMContentLoaded', function() {
+        const bars = document.querySelectorAll('.bar-fill');
+        bars.forEach(bar => {
+            const width = bar.getAttribute('data-width');
+            if (width) {
+                bar.style.width = width + '%';
+            }
+        });
+
+        // Aplicar height dinámico a las barras verticales
+        const verticalBars = document.querySelectorAll('.vertical-bar-track');
+        verticalBars.forEach(bar => {
+            const height = bar.getAttribute('data-height');
+            if (height) {
+                bar.style.height = height + '%';
+            }
+        });
+
+        // Renderizar gráfico de líneas si existen datos
+        const lineChartCanvas = document.getElementById('lineChart');
+        if (lineChartCanvas) {
+            renderLineChart();
+        }
+    });
